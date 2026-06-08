@@ -57,8 +57,9 @@ export default function IncidentsPage() {
   const { data: incidents = [], isLoading } = useIncidents();
   const acknowledge = useAcknowledgeIncident();
 
-  // Client-side filter
-  const filtered = incidents.filter((inc) => {
+  // ── Client-side filter ───────────────────────────────────────────────────────
+  // Typed 'inc' as 'Incident' to fix the implicit 'any' compile error
+  const filtered = incidents.filter((inc: Incident) => {
     const catMatch =
       category === "All" || inc.incident_type === category;
     const statusMap: Record<string, string[]> = {
