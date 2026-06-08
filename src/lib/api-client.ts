@@ -13,7 +13,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import Cookies from "js-cookie";
-import { API_BASE, TOKEN_KEY, REFRESH_KEY, AUTH_ENDPOINTS } from "@/constants";
+import {TOKEN_KEY, REFRESH_KEY, AUTH_ENDPOINTS } from "@/constants";
 import type { AuthTokens, ApiError } from "@/types";
 
 // ─── Create instance ──────────────────────────────────────────────────────────
