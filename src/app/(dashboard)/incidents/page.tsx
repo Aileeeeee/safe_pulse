@@ -54,7 +54,10 @@ export default function IncidentsPage() {
   const [category, setCategory] = useState("All");
   const [status,   setStatus]   = useState("All");
 
-  const { data: incidents = [] as Incident[], isLoading } = useIncidents();
+  // Force the final 'incidents' variable to be an array of Incidents
+  const { data, isLoading } = useIncidents();
+  const incidents = (data ?? []) as Incident[];
+  
   const acknowledge = useAcknowledgeIncident();
 
   // ── Client-side filter ───────────────────────────────────────────────────────
