@@ -161,3 +161,17 @@ export interface PaginatedResponse<T> {
   previous: string | null;
   results: T[];
 }
+export interface ActiveAlert {
+  id: number | string;
+  type: "critical" | "warning" | "info";
+  title: string;
+  description: string;
+  area: string;
+  count: number;
+}
+
+export interface TopArea {
+  name: string;
+  percentage: number;
+  count: number;
+}
