@@ -42,7 +42,11 @@ export default function ReportsPage() {
   const [category, setCategory] = useState("All");
   const [status,   setStatus]   = useState("All");
 
-  const { data: incidents = [], isLoading } = useIncidents();
+  // 1. Extract data and isLoading from the hook
+  const { data, isLoading } = useIncidents();
+  
+  // 2. Cast the final array so TypeScript knows exactly what it is
+  const incidents = (data ?? []) as Incident[];
   const acknowledge = useAcknowledgeIncident();
 
   // Reports = same incidents, just called "reports" with R- prefix
