@@ -56,7 +56,7 @@ export function LiveFeed({
           key={inc.id}
           className={cn(
             "sp-card p-4 border-l-[3px] cursor-pointer hover:shadow-md transition-shadow",
-            SEVERITY_BORDER[inc.severity]
+            SEVERITY_BORDER[inc.severity_level]
           )}
           onClick={() => (window.location.href = `/incidents/${inc.id}`)}
         >
@@ -64,8 +64,8 @@ export function LiveFeed({
             <div className="flex items-center gap-2">
               <span className={cn(
                 "w-2 h-2 rounded-full flex-shrink-0 mt-0.5",
-                inc.severity === "critical" ? "bg-danger" :
-                inc.severity === "high"     ? "bg-warning" : "bg-yellow-400"
+                inc.severity_level === "critical" ? "bg-danger" :
+                inc.severity_level === "high"     ? "bg-warning" : "bg-yellow-400"
               )} />
               <span className="text-[14.5px] font-semibold text-gray-900">
                 {inc.category_display}
@@ -87,7 +87,7 @@ export function LiveFeed({
           </div>
 
           <div className="flex items-center justify-between">
-            <SeverityBadge severity={inc.severity} />
+            <SeverityBadge severity={inc.severity_level} />
             {inc.status === "new" ? (
               <button
                 onClick={(e) => { e.stopPropagation(); handleAck(inc); }}
