@@ -20,7 +20,7 @@ export function LiveFeed({
     acknowledge.mutate(
       { id: incident.id },
       {
-        onSuccess: () => toast.success(`Incident ${incident.ref} acknowledged`),
+        onSuccess: () => toast.success(`Incident ${incident.id} acknowledged`),
         onError: () => toast.error("Failed to acknowledge. Try again."),
       }
     );
