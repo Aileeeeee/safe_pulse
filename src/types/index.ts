@@ -53,6 +53,7 @@ export interface AuthResponse {
 // ─── Incidents ────────────────────────────────────────────────────────────────
 
 export type IncidentSeverity = "Critical" | "High" | "Medium" | "Low";
+export type IncidentStatus = "New" | "Ongoing" | "Active" | "Closed" | "Resolved";
 
 export interface TimelineEvent {
   time:        string;
