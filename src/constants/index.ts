@@ -1,4 +1,4 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://safepulse-production-4e0d.up.railway.app";
+export const NEXT_PUBLIC_API_BASE_URL = "https://safepulse-production-4e0d.up.railway.app";
 
 export const AUTH_ENDPOINTS = {
   SIGNUP:     "/api/auth/signup/",
