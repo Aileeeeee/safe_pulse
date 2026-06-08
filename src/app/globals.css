@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: "DM Sans", system-ui, sans-serif;
+    --font-mono: "DM Mono", monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #f0ede8;
+    color: #18181a;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #e4e0da;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c8c5be;
+  }
+}
+
+@layer components {
+  /* Live pulse animation for the green dot */
+  .live-dot {
+    @apply w-2 h-2 rounded-full bg-green-500;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+    animation: pulse-live 2s infinite;
+  }
+
+  @keyframes pulse-live {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25); }
+    50%       { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.08); }
+  }
+
+  /* Sidebar nav item */
+  .nav-item {
+    @apply flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm
+           text-white/60 cursor-pointer transition-all duration-150
+           hover:bg-sidebar-hover hover:text-white;
+  }
+  .nav-item.active {
+    @apply bg-sidebar-active text-white font-medium;
+  }
+
+  /* Card surface */
+  .sp-card {
+    @apply bg-white rounded-sp border border-gray-100 shadow-card;
+  }
+}
