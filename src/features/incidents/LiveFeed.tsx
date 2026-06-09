@@ -64,8 +64,8 @@ export function LiveFeed({
             <div className="flex items-center gap-2">
               <span className={cn(
                 "w-2 h-2 rounded-full flex-shrink-0 mt-0.5",
-                inc.severity_level === "critical" ? "bg-danger" :
-                inc.severity_level === "high"     ? "bg-warning" : "bg-yellow-400"
+                inc.severity_level === "Critical" ? "bg-danger" :
+                inc.severity_level === "High"     ? "bg-warning" : "bg-yellow-400"
               )} />
               <span className="text-[14.5px] font-semibold text-gray-900">
                 {inc.category_display}
