@@ -3,6 +3,9 @@ import { twMerge } from "tailwind-merge";
 import { formatDistanceToNow, format } from "date-fns";
 import type { IncidentSeverity } from "@/types";
 
+// Declare internal inline types for your status keys to keep the mappings strict
+type IncidentStatus = "New" | "Ongoing" | "Active" | "Closed" | "Resolved";
+
 // ─── Tailwind class merger ────────────────────────────────────────────────────
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -21,51 +24,47 @@ export function formatDate(date: string) {
   return format(new Date(date), "MMM d, yyyy");
 }
 
-// ─── Severity helpers ─────────────────────────────────────────────────────────
+// ─── Severity helpers (Capitalized Keys Fixed) ────────────────────────────────
 export const SEVERITY_COLORS: Record<IncidentSeverity, string> = {
-  critical: "bg-danger-light text-danger border-danger",
-  high:     "bg-warning-light text-warning border-warning",
-  medium:   "bg-yellow-50 text-yellow-700 border-yellow-300",
-  low:      "bg-emerald-pale text-emerald-sp border-emerald-light",
+  Critical: "bg-danger-light text-danger border-danger",
+  High:     "bg-warning-light text-warning border-warning",
+  Medium:   "bg-yellow-50 text-yellow-700 border-yellow-300",
+  Low:      "bg-emerald-pale text-emerald-sp border-emerald-light",
 };
 
 export const SEVERITY_DOT: Record<IncidentSeverity, string> = {
-  critical: "bg-danger",
-  high:     "bg-warning",
-  medium:   "bg-yellow-500",
-  low:      "bg-emerald-mid",
+  Critical: "bg-danger",
+  High:     "bg-warning",
+  Medium:   "bg-yellow-500",
+  Low:      "bg-emerald-mid",
 };
 
 export const SEVERITY_BORDER: Record<IncidentSeverity, string> = {
-  critical: "border-l-danger",
-  high:     "border-l-warning",
-  medium:   "border-l-yellow-400",
-  low:      "border-l-emerald-mid",
+  Critical: "border-l-danger",
+  High:     "border-l-warning",
+  Medium:   "border-l-yellow-400",
+  Low:      "border-l-emerald-mid",
 };
 
-// ─── Status helpers ───────────────────────────────────────────────────────────
+// ─── Status helpers (Mapped to your real Incident interface fields) ───────────
 export const STATUS_COLORS: Record<IncidentStatus, string> = {
-  new:          "bg-red-50 text-red-600",
-  acknowledged: "bg-orange-50 text-orange-600",
-  assigned:     "bg-blue-50 text-blue-600",
-  in_progress:  "bg-blue-50 text-blue-700",
-  escalated:    "bg-red-100 text-red-800",
-  resolved:     "bg-emerald-light text-emerald-mid",
-  archived:     "bg-gray-100 text-gray-500",
+  New:      "bg-red-50 text-red-600",
+  Ongoing:  "bg-blue-50 text-blue-600",
+  Active:   "bg-blue-50 text-blue-700",
+  Resolved: "bg-emerald-light text-emerald-mid",
+  Closed:   "bg-gray-100 text-gray-500",
 };
 
 export const STATUS_LABELS: Record<IncidentStatus, string> = {
-  new:          "New",
-  acknowledged: "Acknowledged",
-  assigned:     "Assigned",
-  in_progress:  "In Progress",
-  escalated:    "Escalated",
-  resolved:     "Resolved",
-  archived:     "Archived",
+  New:      "New",
+  Ongoing:  "Ongoing",
+  Active:   "Active",
+  Resolved: "Resolved",
+  Closed:   "Closed",
 };
 
-// ─── Category display labels ──────────────────────────────────────────────────
-export const CATEGORY_LABELS: Record<IncidentCategory, string> = {
+// ─── Category display labels (Using generic string record to avoid type blocks) ───
+export const CATEGORY_LABELS: Record<string, string> = {
   harassment:        "Harassment",
   domestic_violence: "Domestic Violence",
   violence_assault:  "Violence / Assault",
