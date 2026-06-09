@@ -58,7 +58,7 @@ function processQueue(error: AxiosError | null, token: string | null) {
   failedQueue = [];
 }
 
-.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<Error>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
