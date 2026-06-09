@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatDistanceToNow, format } from "date-fns";
-import type { IncidentSeverity, IncidentStatus, IncidentCategory } from "@/types";
+import type { IncidentSeverity } from "@/types";
 
 // ─── Tailwind class merger ────────────────────────────────────────────────────
 export function cn(...inputs: ClassValue[]) {
