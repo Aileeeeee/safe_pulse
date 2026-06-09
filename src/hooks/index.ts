@@ -83,7 +83,7 @@ export function useIncidents(filters?: IncidentFilters) {
     queryKey: [...QUERY_KEYS.INCIDENTS, filters],
     queryFn: async () => {
       const data = await incidentService.list(filters);
-      return data.results; // ✅ THIS IS THE ARRAY
+      return data; // 
     },
     staleTime: 10_000,
     refetchInterval: 20_000,
