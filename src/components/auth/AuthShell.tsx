@@ -22,6 +22,7 @@ export function AuthShell({ children }: AuthShellProps) {
             alt="SAFEPULSE"
             width={64}
             height={64}
+            unoptimized
             className="object-contain"
           />
           <div className="text-[22px] font-bold text-white tracking-wide">
