@@ -26,7 +26,7 @@ const api: AxiosInstance = axios.create({
 });
 
 // ─── Request interceptor — attach access token ────────────────────────────────
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = Cookies.get(TOKEN_KEY);
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -49,9 +49,9 @@ function processQueue(error: AxiosError | null, token: string | null) {
   failedQueue = [];
 }
 
-api.interceptors.response.use(
+.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<ApiError>) => {
+  async (error: AxiosError<Error>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
@@ -65,7 +65,7 @@ api.interceptors.response.use(
           if (originalRequest.headers) {
             originalRequest.headers.Authorization = `Bearer ${token}`;
           }
-          return api(originalRequest);
+          return (originalRequest);
         });
       }
 
@@ -83,7 +83,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post<AuthTokens>(
-          `${API_BASE}${AUTH_ENDPOINTS.REFRESH}`,
+          `${API_BASE_URL}${AUTH_ENDPOINTS.REFRESH}`,
           { refresh }
         );
         saveTokens(data);
