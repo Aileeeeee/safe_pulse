@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
-const apiBaseUrl = process.env.API_BASE_URL;
+const HARDCODED_FALLBACK = "https://safepulse-production-4e0d.up.railway.app";
 
-if (!apiBaseUrl) {
-  throw new Error("API_BASE_URL is not defined");
-}
+const apiBaseUrl = process.env.API_BASE_URL || HARDCODED_FALLBACK;
+
 
 const nextConfig: NextConfig = {
   images: {
