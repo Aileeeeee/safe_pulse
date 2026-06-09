@@ -76,19 +76,19 @@ export function LiveFeed({
 
           <div className="flex flex-wrap gap-3 mb-3">
             <span className="flex items-center gap-1.5 text-[12.5px] text-gray-500">
-              <MapPin size={13} className="text-emerald-mid" /> {inc.area}
+              <MapPin size={13} className="text-emerald-mid" /> {inc.location}
             </span>
             <span className="flex items-center gap-1.5 text-[12.5px] text-gray-500">
-              <Clock size={13} className="text-emerald-mid" /> {formatTime(inc.reported_at)}
+              <Clock size={13} className="text-emerald-mid" /> {formatTime(inc.incident_time)}
             </span>
             <span className="flex items-center gap-1.5 text-[12.5px] text-gray-500">
-              <MessageSquare size={13} className="text-emerald-mid" /> Via {inc.source}
+              <MessageSquare size={13} className="text-emerald-mid" /> Via {inc.reporting_channel}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
             <SeverityBadge severity={inc.severity_level} />
-            {inc.status === "new" ? (
+            {inc.follow_up_status === "New"? (
               <button
                 onClick={(e) => { e.stopPropagation(); handleAck(inc); }}
                 disabled={acknowledge.isPending}
@@ -111,13 +111,13 @@ export function LiveFeed({
 
 // ─── Active Alerts Panel ──────────────────────────────────────────────────────
 export function AlertsPanel({ alerts }: { alerts: ActiveAlert[] }) {
-  const iconMap = {
+  const iconMap: Record<string, { bg: string; icon: React.ReactNode }> = {
     critical: { bg: "bg-danger-light", icon: <Shield size={17} className="text-danger" /> },
     warning:  { bg: "bg-warning-light", icon: <AlertTriangle size={17} className="text-warning" /> },
     info:     { bg: "bg-blue-50",      icon: <AlertTriangle size={17} className="text-blue-500" /> },
   };
 
-  const titleColor = {
+  const titleColor: Record<string, string> = {
     critical: "text-danger",
     warning:  "text-warning",
     info:     "text-blue-500",
@@ -126,7 +126,8 @@ export function AlertsPanel({ alerts }: { alerts: ActiveAlert[] }) {
   return (
     <div className="space-y-2">
       {alerts.map((alert) => {
-        const config = iconMap[alert.type];
+        const config = iconMap[alert.type] ?? { bg: "bg-gray-50", icon: <AlertTriangle size={17} /> };
+        const colorClass = titleColor[alert.type] ?? "text-gray-600";
         return (
           <div
             key={alert.id}
