@@ -68,10 +68,10 @@ export function LiveFeed({
                 inc.severity_level === "High"     ? "bg-warning" : "bg-yellow-400"
               )} />
               <span className="text-[14.5px] font-semibold text-gray-900">
-                {inc.category_display}
+                {inc.incident_type}
               </span>
             </div>
-            <span className="text-[12px] text-gray-400 font-mono">{inc.ref}</span>
+            <span className="text-[12px] text-gray-400 font-mono">{inc.id}</span>
           </div>
 
           <div className="flex flex-wrap gap-3 mb-3">
