@@ -16,6 +16,8 @@ import Cookies from "js-cookie";
 import {TOKEN_KEY, REFRESH_KEY, AUTH_ENDPOINTS } from "@/constants";
 import type { AuthTokens, ApiError } from "@/types";
 
+export const API_BASE_URL = "https://safepulse-production-4e0d.up.railway.app";
+
 // ─── Create instance ──────────────────────────────────────────────────────────
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
