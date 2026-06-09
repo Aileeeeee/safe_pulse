@@ -25,14 +25,23 @@ const api: AxiosInstance = axios.create({
   timeout: 15_000,
 });
 
-// ─── Request interceptor — attach access token ────────────────────────────────
-.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = Cookies.get(TOKEN_KEY);
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Look for your api.interceptors.request.use(...) block:
+api.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get(TOKEN_KEY);
+    
+    // Check if token exists and config.headers is initialized
+    if (token && config.headers) {
+      // ── Fix: Use bracket notation or safe assignment ──
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 // ─── Response interceptor — handle 401 / token refresh ───────────────────────
 let isRefreshing = false;
