@@ -18,7 +18,7 @@ import type { AuthTokens, ApiError } from "@/types";
 
 // ─── Create instance ──────────────────────────────────────────────────────────
 const api: AxiosInstance = axios.create({
-  baseURL: API_BASE,
+  baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
   timeout: 15_000,
 });
