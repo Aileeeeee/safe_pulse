@@ -18,7 +18,7 @@ export function AuthShell({ children }: AuthShellProps) {
         {/* Logo */}
         <div className="relative z-10 flex flex-col items-start gap-2.5 mb-auto">
           <Image
-            src="https://raw.githubusercontent.com/Aileeeeee/safe_pulse/main/public/safepulse-icon.png"
+            src="/safepulse-icon.png"
             alt="SAFEPULSE"
             width={64}
             height={64}
