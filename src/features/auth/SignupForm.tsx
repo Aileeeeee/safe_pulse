@@ -54,13 +54,6 @@ function getStrength(pw: string) {
   ][s] ?? { w: "0%", color: "#c93535", label: "" };
 }
 
-// ── Role options — matching your Django ROLE_CHOICES exactly ──────────────────
-const ROLES: { value: UserRole; label: string; sub: string; icon: string }[] = [
-  { value: "COORDINATOR", label: "NGO Coordinator", sub: "Manages operations",  icon: "🛡️" },
-  { value: "FIELD_STAFF", label: "Field Staff",     sub: "Field operations",    icon: "🚨" },
-  { value: "ADMIN",       label: "System Admin",    sub: "Full platform access", icon: "⚙️" },
-];
-
 // ── Step dots ─────────────────────────────────────────────────────────────────
 function StepDots({ current }: { current: number }) {
   return (
@@ -256,7 +249,7 @@ export function SignupForm() {
             Your organisation
           </h1>
           <p className="text-[13.5px] text-gray-500 mb-6 leading-relaxed">
-            Step 2 of 3 — Find your organisation &amp; select your role
+            Step 2 of 3 — Find your organisation
           </p>
 
           {/* Organisation search */}
@@ -273,49 +266,7 @@ export function SignupForm() {
             />
           </div>
 
-          {/* Role selection */}
-          <div className="mb-5">
-            <label className="block text-[12.5px] font-medium text-gray-800 mb-2">
-              Your role
-            </label>
-            <div className="flex flex-col gap-2">
-              {ROLES.map((r) => (
-                <label
-                  key={r.value}
-                  className={cn(
-                    "flex items-center gap-3 border-[1.5px] rounded-[10px] px-4 py-3 cursor-pointer transition-all",
-                    f2.watch("role") === r.value
-                      ? "border-emerald-mid bg-emerald-pale"
-                      : "border-gray-200 hover:border-emerald-mid"
-                  )}
-                >
-                  <input
-                    {...f2.register("role")}
-                    type="radio"
-                    value={r.value}
-                    className="hidden"
-                  />
-                  <span className="text-xl">{r.icon}</span>
-                  <div>
-                    <p className="text-[13.5px] font-medium text-gray-900">
-                      {r.label}
-                    </p>
-                    <p className="text-[12px] text-gray-400">{r.sub}</p>
-                  </div>
-                  {f2.watch("role") === r.value && (
-                    <span className="ml-auto w-4 h-4 rounded-full bg-emerald-mid flex items-center justify-center">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                    </span>
-                  )}
-                </label>
-              ))}
-            </div>
-            {f2.formState.errors.role && (
-              <p className="text-[12px] text-red-500 mt-1">
-                {f2.formState.errors.role.message}
-              </p>
-            )}
-          </div>
+          
 
           <button
             type="submit"
