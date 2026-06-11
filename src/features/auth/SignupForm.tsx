@@ -13,7 +13,7 @@ import type { Organisation, UserRole } from "@/types";
 import { UsernameInput } from "@/components/auth/UsernameInput";
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
-const signupSchema = z.object({
+const step1Schema = z.object({
   first_name: z.string().min(2, "Enter your first name"),
   last_name:  z.string().min(2, "Enter your last name"),
   // Highlights the fix:
