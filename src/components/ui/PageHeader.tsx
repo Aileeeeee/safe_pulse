@@ -1,4 +1,5 @@
-// @/components/ui/PageHeader.tsx
+import React from "react";
+
 export function PageHeader({
   title,
   subtitle,
