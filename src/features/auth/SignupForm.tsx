@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,10 +16,9 @@ import { UsernameInput } from "@/components/auth/UsernameInput";
 const step1Schema = z.object({
   first_name: z.string().min(2, "Enter your first name"),
   last_name:  z.string().min(2, "Enter your last name"),
-  // Highlights the fix:
   username:   z.string()
                .min(3, "Username must be at least 3 characters")
-               .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+               .regex(/^[a-zA-Z0-9_.]+$/, "Username can only contain letters, numbers, underscores, and dots"),
   email:      z.string().email("Enter a valid email address"),
 });
 
@@ -96,6 +95,11 @@ export function SignupForm() {
   const f2 = useForm<Step2>({ resolver: zodResolver(step2Schema) });
   const f3 = useForm<Step3>({ resolver: zodResolver(step3Schema) });
 
+  // ── Sync Custom State with React Hook Form ─────────────────────────────
+  useEffect(() => {
+    f1.setValue("username", username, { shouldValidate: !!username });
+  }, [username, f1]);
+
   // ── Step handlers ───────────────────────────────────────────────────────────
   async function submitStep1(data: Step1) {
     if (!username) {
@@ -128,7 +132,7 @@ export function SignupForm() {
       email:           formData.email!,
       password:        data.password,
       organisation_id: selectedOrg.id,
-      role:            "FIELD_STAFF" as UserRole, // Sets a standard backup option for Django
+      role:            "FIELD_STAFF" as UserRole,
     };
 
     try {
@@ -213,7 +217,7 @@ export function SignupForm() {
             </div>
           </div>
 
-          {/* After first name + last name grid, before email */}
+          {/* Custom Username Component hooked to form error output */}
           <div className="mb-3.5">
             <label className="block text-[12.5px] font-medium text-gray-800 mb-1.5">
               Username
@@ -223,6 +227,7 @@ export function SignupForm() {
               lastName={f1.watch("last_name")  ?? ""}
               value={username}
               onChange={setUsername}
+              error={f1.formState.errors.username?.message}
             />
             <p className="text-[11.5px] text-gray-400 mt-1.5">
               This is what you will use to sign in
@@ -273,7 +278,6 @@ export function SignupForm() {
             Step 2 of 3 — Find your organisation
           </p>
 
-          {/* Organisation search */}
           <div className="mb-5">
             <label className="block text-[12.5px] font-medium text-gray-800 mb-1.5">
               Organisation name
@@ -339,7 +343,6 @@ export function SignupForm() {
                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
-            {/* Strength bar */}
             <div className="h-[3px] rounded-sm bg-gray-100 mt-2 overflow-hidden">
               <div
                 className="h-full rounded-sm transition-all duration-300"
@@ -410,7 +413,6 @@ export function SignupForm() {
             <strong className="text-gray-800">{formData.first_name}</strong>.
           </p>
 
-          {/* Username box */}
           <div className="bg-emerald-pale border border-emerald-light rounded-xl p-4 mb-5 text-left">
             <p className="text-[11.5px] font-semibold text-gray-400 uppercase tracking-wide mb-1">
               Your login username
