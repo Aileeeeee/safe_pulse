@@ -133,4 +133,50 @@ export function useAcknowledgeIncident() {
     },
   });
 }
+
+export function useAssignIncident() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, assigned_to, notes }: {
+      id: number; assigned_to: number; notes?: string
+    }) => incidentService.assign(id, assigned_to, notes),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENT(id) });
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENTS });
+    },
+  });
+}
+
+export function useConfirmContacts() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number }) =>
+      incidentService.confirmContacts(id),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENT(id) });
+    },
+  });
+}
+
+export function useCloseIncident() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...payload }: {
+      id: number; support_provided?: string; notes?: string
+    }) => incidentService.close(id, payload),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENT(id) });
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENTS });
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
+    },
+  });
+}
+
+export function useTeam() {
+  return useQuery({
+    queryKey: QUERY_KEYS.TEAM,
+    queryFn:  authService.getTeam,
+    staleTime: 60_000,
+  });
+}
   
