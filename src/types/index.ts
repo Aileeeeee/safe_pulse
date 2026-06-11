@@ -71,6 +71,20 @@ export interface TrustedContact {
   notified_at: string;
 }
 
+export interface IncidentAssignment {
+  assigned_to: {
+    id:       number;
+    name:     string;
+    username: string;
+  };
+  assigned_by: {
+    name: string;
+  };
+  assigned_at: string;
+  notes:       string;
+}
+
+
 export interface Incident {
   id:                       number;
   incident_date:            string;
@@ -98,6 +112,7 @@ export interface Incident {
   acknowledged_at:          string | null;
   device_hash:              string;
   last_verified_location:   string;
+  assignment?: IncidentAssignment;
   timeline:                 TimelineEvent[];
   trusted_contacts:         TrustedContact[];
 }
