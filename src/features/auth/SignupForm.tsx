@@ -18,18 +18,13 @@ const step1Schema = z.object({
   email:      z.string().email("Enter a valid email address"),
 });
 
-const step2Schema = z.object({
-  role: z.enum(["COORDINATOR", "FIELD_STAFF", "ADMIN"], {
-    required_error: "Please select a role",
-  }),
-});
+const step2Schema = z.object({});
 
 const step3Schema = z
   .object({
     password:         z.string().min(8, "Minimum 8 characters"),
     confirm_password: z.string(),
-  })
-  .refine((d) => d.password === d.confirm_password, {
+  }  .refine((d) => d.password === d.confirm_password, {
     message: "Passwords do not match",
     path:    ["confirm_password"],
   });
@@ -41,7 +36,7 @@ type Step3 = z.infer<typeof step3Schema>;
 // ── Password strength ─────────────────────────────────────────────────────────
 function getStrength(pw: string) {
   let s = 0;
-  if (pw.length >= 8)            s++;
+  if (pw.length >= 8)           s++;
   if (/[A-Z]/.test(pw))         s++;
   if (/[0-9]/.test(pw))         s++;
   if (/[^a-zA-Z0-9]/.test(pw)) s++;
@@ -81,7 +76,7 @@ const inputCls = (err?: boolean) => cn(
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function SignupForm() {
-  const [step,        setStep]        = useState<1 | 2 | 3 | "done">(1);
+  const [step,            setStep]        = useState<1 | 2 | 3 | "done">(1);
   const [formData,    setFormData]    = useState<Partial<Step1 & Step2>>({});
   const [selectedOrg, setSelectedOrg] = useState<Organisation | null>(null);
   const [orgError,    setOrgError]    = useState("");
@@ -110,10 +105,8 @@ export function SignupForm() {
     setStep(3);
   }
 
-  // Add this state at the top of the component
   const [createdUsername, setCreatedUsername] = useState("");
 
-  // Update submitStep3 to save the username from the response
   async function submitStep3(data: Step3) {
     if (!selectedOrg) { setStep(2); return; }
 
@@ -123,12 +116,12 @@ export function SignupForm() {
       email:           formData.email!,
       password:        data.password,
       organisation_id: selectedOrg.id,
-      role:            formData.role! as UserRole,
+      role:            "FIELD_STAFF" as UserRole, // Sets a standard backup option for Django
     };
 
     try {
       const response = await signup.mutateAsync(payload);
-      setCreatedUsername(response.user.username); // ← save the generated username
+      setCreatedUsername(response.user.username);
       setStep("done");
     } catch (err: unknown) {
       const e = err as {
@@ -241,7 +234,7 @@ export function SignupForm() {
         </form>
       )}
 
-      {/* ── Step 2 — Organisation + Role ─────────────────────────────────── */}
+      {/* ── Step 2 — Organisation ───────────────────────────────────────── */}
       {step === 2 && (
         <form onSubmit={f2.handleSubmit(submitStep2)} noValidate>
           <StepDots current={2} />
@@ -253,7 +246,7 @@ export function SignupForm() {
           </p>
 
           {/* Organisation search */}
-          <div className="mb-4">
+          <div className="mb-5">
             <label className="block text-[12.5px] font-medium text-gray-800 mb-1.5">
               Organisation name
             </label>
@@ -265,8 +258,6 @@ export function SignupForm() {
               error={orgError}
             />
           </div>
-
-          
 
           <button
             type="submit"
@@ -374,55 +365,55 @@ export function SignupForm() {
 
       {/* ── Done ─────────────────────────────────────────────────────────── */}
       {step === "done" && (
-      <div className="text-center py-6">
-        <div className="w-14 h-14 rounded-full bg-emerald-light flex items-center justify-center mx-auto mb-4">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-            stroke="#1c6e4e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
+        <div className="text-center py-6">
+          <div className="w-14 h-14 rounded-full bg-emerald-light flex items-center justify-center mx-auto mb-4">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+              stroke="#1c6e4e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+
+          <h1 className="text-[21px] font-semibold text-gray-900 mb-2">
+            Account created!
+          </h1>
+          <p className="text-[13.5px] text-gray-500 mb-5 leading-relaxed">
+            Welcome to SAFEPULSE,{" "}
+            <strong className="text-gray-800">{formData.first_name}</strong>.
+          </p>
+
+          {/* Username box */}
+          <div className="bg-emerald-pale border border-emerald-light rounded-xl p-4 mb-5 text-left">
+            <p className="text-[11.5px] font-semibold text-gray-400 uppercase tracking-wide mb-1">
+              Your login username
+            </p>
+            <p className="text-[18px] font-bold text-emerald-sp font-mono tracking-wide">
+              {createdUsername}
+            </p>
+            <p className="text-[12px] text-gray-400 mt-1.5">
+              Use this username to sign in. Save it somewhere safe.
+            </p>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-5 text-left">
+            <p className="text-[12.5px] text-amber-700 font-medium flex items-center gap-2">
+              <span>⚠️</span> Please write this down or screenshot it before leaving this page.
+            </p>
+          </div>
+
+          <p className="text-[13px] text-gray-400 mb-5">
+            Organisation:{" "}
+            <strong className="text-gray-600">{selectedOrg?.name}</strong>
+          </p>
+
+          <Link
+            href="/login"
+            className="block w-full py-3 bg-sidebar text-white text-sm font-medium rounded-[10px] hover:bg-emerald-sp transition-colors text-center"
+          >
+            Go to sign in →
+          </Link>
         </div>
-
-        <h1 className="text-[21px] font-semibold text-gray-900 mb-2">
-          Account created!
-        </h1>
-        <p className="text-[13.5px] text-gray-500 mb-5 leading-relaxed">
-          Welcome to SAFEPULSE,{" "}
-          <strong className="text-gray-800">{formData.first_name}</strong>.
-        </p>
-
-        {/* Username box — clearly shown */}
-        <div className="bg-emerald-pale border border-emerald-light rounded-xl p-4 mb-5 text-left">
-          <p className="text-[11.5px] font-semibold text-gray-400 uppercase tracking-wide mb-1">
-            Your login username
-          </p>
-          <p className="text-[18px] font-bold text-emerald-sp font-mono tracking-wide">
-            {createdUsername}
-          </p>
-          <p className="text-[12px] text-gray-400 mt-1.5">
-            Use this username to sign in. Save it somewhere safe.
-          </p>
-        </div>
-
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-5 text-left">
-          <p className="text-[12.5px] text-amber-700 font-medium flex items-center gap-2">
-            <span>⚠️</span> Please write this down or screenshot it before leaving this page.
-          </p>
-        </div>
-
-        <p className="text-[13px] text-gray-400 mb-5">
-          Organisation:{" "}
-          <strong className="text-gray-600">{selectedOrg?.name}</strong>
-        </p>
-
-        <Link
-          href="/login"
-          className="block w-full py-3 bg-sidebar text-white text-sm font-medium rounded-[10px] hover:bg-emerald-sp transition-colors text-center"
-        >
-          Go to sign in →
-        </Link>
-      </div>
-    )}
+      )}
     </div>
   );
 }
