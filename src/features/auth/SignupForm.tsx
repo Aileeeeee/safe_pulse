@@ -10,11 +10,13 @@ import { useSignup } from "@/hooks";
 import { OrgSearchInput } from "@/components/auth/OrgSearchInput";
 import { cn } from "@/utils";
 import type { Organisation, UserRole } from "@/types";
+import { UsernameInput } from "@/components/auth/UsernameInput";
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 const step1Schema = z.object({
   first_name: z.string().min(2, "Enter your first name"),
   last_name:  z.string().min(2, "Enter your last name"),
+  username:      z.string().username("Enter a valid username"),
   email:      z.string().email("Enter a valid email address"),
 });
 
@@ -83,6 +85,7 @@ export function SignupForm() {
   const [orgError,    setOrgError]    = useState("");
   const [showPass,    setShowPass]    = useState(false);
   const [pw,          setPw]          = useState("");
+  const [username, setUsername] = useState("");
 
   const signup = useSignup();
 
@@ -91,8 +94,12 @@ export function SignupForm() {
   const f3 = useForm<Step3>({ resolver: zodResolver(step3Schema) });
 
   // ── Step handlers ───────────────────────────────────────────────────────────
-  function submitStep1(data: Step1) {
-    setFormData((p) => ({ ...p, ...data }));
+  async function submitStep1(data: Step1) {
+    if (!username) {
+      toast.error("Please enter or select a username");
+      return;
+    }
+    setFormData((p) => ({ ...p, ...data, username }));
     setStep(2);
   }
 
@@ -114,6 +121,7 @@ export function SignupForm() {
     const payload = {
       first_name:      formData.first_name!,
       last_name:       formData.last_name!,
+      username:        formData.username!,
       email:           formData.email!,
       password:        data.password,
       organisation_id: selectedOrg.id,
@@ -200,6 +208,22 @@ export function SignupForm() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* After first name + last name grid, before email */}
+          <div className="mb-3.5">
+            <label className="block text-[12.5px] font-medium text-gray-800 mb-1.5">
+              Username
+            </label>
+            <UsernameInput
+              firstName={f1.watch("first_name") ?? ""}
+              lastName={f1.watch("last_name")  ?? ""}
+              value={username}
+              onChange={setUsername}
+            />
+            <p className="text-[11.5px] text-gray-400 mt-1.5">
+              This is what you will use to sign in
+            </p>
           </div>
 
           <div className="mb-5">
