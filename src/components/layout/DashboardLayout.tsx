@@ -11,15 +11,21 @@ import { useLogout } from "@/hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { Topbar } from "./Topbar";
 
+const user = useAuthStore((s) => s.user);
+const role = user?.role ?? "FIELD_STAFF";
+
 const nav = [
   { label: "Dashboard",    href: "/dashboard",  icon: LayoutDashboard },
-  { label: "Incidents",    href: "/incidents",  icon: MapPin,  badge: "13" },
-  { label: "Reports",      href: "/reports",    icon: FileText }, 
-  { label: "Alerts",       href: "/alerts",     icon: Bell,    badge: "3" },
-  { label: "Analytics",   href: "/analytics",  icon: BarChart2,  section: "Operations" },
-  { label: "Team",         href: "/team",       icon: Users },
-  { label: "Activity Log", href: "/activity",   icon: FileText },
-  { label: "Settings",     href: "/settings",   icon: Settings, section: "Configuration" },
+  { label: "Incidents",    href: "/incidents",  icon: MapPin },
+  { label: "Reports",      href: "/reports",    icon: FileText },
+  { label: "Alerts",       href: "/alerts",     icon: Bell },
+  { label: "Analytics",    href: "/analytics",  icon: BarChart2, section: "Operations" },
+  // Team — only show for COORDINATOR and ADMIN
+  ...(role !== "FIELD_STAFF" ? [
+    { label: "Team", href: "/team", icon: Users }
+  ] : []),
+  { label: "Activity Log", href: "/activity",  icon: FileText2 },
+  { label: "Settings",     href: "/settings",  icon: Settings,  section: "Configuration" },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
