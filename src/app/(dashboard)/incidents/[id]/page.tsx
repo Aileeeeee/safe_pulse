@@ -15,6 +15,7 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import { Skeleton } from "@/components/ui";
 import { IncidentMap } from "@/components/incidents/IncidentMap";
+import { DeviceHistoryPanel } from "@/components/incidents/DeviceHistoryPanel";
 import { cn } from "@/utils";
 
 const SEV = {
@@ -467,6 +468,9 @@ export default function IncidentDetailPage({
               {incident.location}
             </p>
           </div>
+          {incident.device_hash && (
+            <DeviceHistoryPanel deviceHash={incident.device_hash} />
+          )}
         </div>
       </div>
 
