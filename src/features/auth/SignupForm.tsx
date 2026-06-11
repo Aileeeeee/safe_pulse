@@ -24,7 +24,8 @@ const step3Schema = z
   .object({
     password:         z.string().min(8, "Minimum 8 characters"),
     confirm_password: z.string(),
-  }  .refine((d) => d.password === d.confirm_password, {
+  })
+  .refine((d) => d.password === d.confirm_password, {
     message: "Passwords do not match",
     path:    ["confirm_password"],
   });
