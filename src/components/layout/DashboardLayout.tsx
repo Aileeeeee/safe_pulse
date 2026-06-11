@@ -11,21 +11,29 @@ import { useLogout } from "@/hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { Topbar } from "./Topbar";
 
+
+type NavItem = {
+  label:    string;
+  href:     string;
+  icon:     React.ComponentType<{ size?: number; className?: string }>;
+  badge?:   string;
+  section?: string;
+};
+
 const user = useAuthStore((s) => s.user);
 const role = user?.role ?? "FIELD_STAFF";
 
-const nav = [
+const nav: NavItem[] = [
   { label: "Dashboard",    href: "/dashboard",  icon: LayoutDashboard },
   { label: "Incidents",    href: "/incidents",  icon: MapPin },
   { label: "Reports",      href: "/reports",    icon: FileText },
   { label: "Alerts",       href: "/alerts",     icon: Bell },
   { label: "Analytics",    href: "/analytics",  icon: BarChart2, section: "Operations" },
-  // Team — only show for COORDINATOR and ADMIN
   ...(role !== "FIELD_STAFF" ? [
     { label: "Team", href: "/team", icon: Users }
-  ] : []),
-  { label: "Activity Log", href: "/activity",  icon: FileText },
-  { label: "Settings",     href: "/settings",  icon: Settings,  section: "Configuration" },
+  ] as NavItem[] : []),
+  { label: "Activity Log", href: "/activity",   icon: FileText },
+  { label: "Settings",     href: "/settings",   icon: Settings, section: "Configuration" },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
