@@ -13,10 +13,13 @@ import type { Organisation, UserRole } from "@/types";
 import { UsernameInput } from "@/components/auth/UsernameInput";
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
-const step1Schema = z.object({
+const signupSchema = z.object({
   first_name: z.string().min(2, "Enter your first name"),
   last_name:  z.string().min(2, "Enter your last name"),
-  username:      z.string().username("Enter a valid username"),
+  // Highlights the fix:
+  username:   z.string()
+               .min(3, "Username must be at least 3 characters")
+               .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
   email:      z.string().email("Enter a valid email address"),
 });
 
