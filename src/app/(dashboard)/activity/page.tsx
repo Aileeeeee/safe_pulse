@@ -1,5 +1,5 @@
 "use client";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 const LOGS = [
   { emoji: "✅", bg: "#e8f2ec", action: "Admin acknowledged incident", highlight: "#2345", meta: "Harassment · Oshodi", time: "10:38 AM" },
