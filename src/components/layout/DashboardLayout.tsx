@@ -24,7 +24,7 @@ const nav = [
   ...(role !== "FIELD_STAFF" ? [
     { label: "Team", href: "/team", icon: Users }
   ] : []),
-  { label: "Activity Log", href: "/activity",  icon: FileText2 },
+  { label: "Activity Log", href: "/activity",  icon: FileText },
   { label: "Settings",     href: "/settings",  icon: Settings,  section: "Configuration" },
 ];
 
