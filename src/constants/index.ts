@@ -7,6 +7,7 @@ export const AUTH_ENDPOINTS = {
   PROFILE:    "/api/auth/profile/",
   REFRESH:    "/api/auth/refresh/",
   ORG_SEARCH: "/api/auth/organisations/search/",
+  USERNAME_SUGGESTIONS: "/api/auth/username-suggestions/",
 } as const;
 
 export const INCIDENT_ENDPOINTS = {
