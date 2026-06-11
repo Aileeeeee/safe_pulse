@@ -53,3 +53,10 @@ export const incidentService = {
     return data;
   },
 };
+
+async fieldStaffDashboard(): Promise<CoordinatorDashboard> {
+  const { data } = await api.get<CoordinatorDashboard>(
+    INCIDENT_ENDPOINTS.DASHBOARD
+  );
+  return data;
+},
