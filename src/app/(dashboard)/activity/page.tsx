@@ -1,6 +1,9 @@
+"use client";
+
 import dynamic from "next/dynamic";
 
-// This tells Next.js 15: "Do not attempt to render or evaluate this on the server!"
+// The import path MUST be a string literal inside the arrow function, 
+// not a variable or a pre-imported component module.
 const ActivityLogView = dynamic(
   () => import("@/components/views/ActivityLogView"),
   { ssr: false }
