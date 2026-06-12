@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { History, AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
+import { History, AlertTriangle, ChevronDown, Loader2, HelpCircle } from "lucide-react";
 import { cn } from "@/utils";
 import api from "@/lib/api-client";
 import { INCIDENT_ENDPOINTS } from "@/constants";
@@ -23,7 +23,10 @@ export function DeviceHistoryPanel({ deviceHash }: DeviceHistoryProps) {
   const [loading,  setLoading]  = useState(false);
   const [expanded, setExpanded] = useState(false);
 
+  const isUnregistered = deviceHash.toUpperCase().includes("UNREGIST");
+
   async function loadHistory() {
+    if (isUnregistered) return;
     if (history) {
       setExpanded((v) => !v);
       return;
@@ -49,31 +52,45 @@ export function DeviceHistoryPanel({ deviceHash }: DeviceHistoryProps) {
           <History size={15} className="text-emerald-mid" />
           <p className="text-[13.5px] font-semibold text-gray-800">Device History</p>
         </div>
-        <button
-          onClick={loadHistory}
-          className="text-[12px] text-emerald-mid font-medium hover:underline flex items-center gap-1"
-        >
-          {loading ? (
-            <Loader2 size={12} className="animate-spin" />
-          ) : (
-            <ChevronDown
-              size={12}
-              className={cn("transition-transform", expanded && "rotate-180")}
-            />
-          )}
-          {loading ? "Loading…" : expanded ? "Hide" : "View history"}
-        </button>
+        {!isUnregistered && (
+          <button
+            onClick={loadHistory}
+            className="text-[12px] text-emerald-mid font-medium hover:underline flex items-center gap-1"
+          >
+            {loading ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <ChevronDown
+                size={12}
+                className={cn("transition-transform", expanded && "rotate-180")}
+              />
+            )}
+            {loading ? "Loading…" : expanded ? "Hide" : "View history"}
+          </button>
+        )}
       </div>
 
-      {/* Masked device hash */}
-      <div className="bg-surface-secondary rounded-lg px-3 py-2 mb-3">
-        <p className="text-[10.5px] text-gray-400 mb-0.5">Anonymous Device ID</p>
-        <p className="text-[12px] font-mono text-gray-600 break-all">
-          {deviceHash.slice(0, 8)}••••••••{deviceHash.slice(-4)}
-        </p>
-      </div>
+      {/* Device ID Display / Status Box */}
+      {isUnregistered ? (
+        <div className="bg-orange-50/60 border border-orange-100 rounded-xl p-3 flex gap-2">
+          <HelpCircle size={16} className="text-orange-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[11.5px] font-medium text-orange-800">Unregistered Application Source</p>
+            <p className="text-[11px] text-orange-600/90 leading-normal mt-0.5">
+              This pulse transmission originated without user profile hardware binding. No tracking historical patterns are available.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-surface-secondary rounded-lg px-3 py-2 mb-3">
+          <p className="text-[10.5px] text-gray-400 mb-0.5">Anonymous Device ID</p>
+          <p className="text-[12px] font-mono text-gray-600 break-all">
+            {deviceHash.slice(0, 8)}••••••••{deviceHash.slice(-4)}
+          </p>
+        </div>
+      )}
 
-      {expanded && history && (
+      {expanded && history && !isUnregistered && (
         <div className="space-y-3 animate-fade-up">
           {/* Stats */}
           <div className="grid grid-cols-2 gap-2">
