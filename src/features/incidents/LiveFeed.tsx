@@ -78,9 +78,34 @@ export function LiveFeed({
             <span className="flex items-center gap-1.5 text-[12.5px] text-gray-500">
               <MapPin size={13} className="text-emerald-mid" /> {inc.location}
             </span>
+            
+            {/* Safe Date/Time Parser Block */}
             <span className="flex items-center gap-1.5 text-[12.5px] text-gray-500">
-              <Clock size={13} className="text-emerald-mid" /> {formatTime(inc.incident_time)}
+              <Clock size={13} className="text-emerald-mid" />
+              {(() => {
+                try {
+                  if (!inc.incident_time) return "Just now";
+                  
+                  // If it's already structured text like "09:21 PM", bypass utilities
+                  if (
+                    typeof inc.incident_time === "string" &&
+                    (inc.incident_time.includes("AM") || inc.incident_time.includes("PM"))
+                  ) {
+                    return inc.incident_time;
+                  }
+
+                  // Verify timestamp before running formatTime utility
+                  if (isNaN(Date.parse(inc.incident_time))) {
+                    return "Just now";
+                  }
+
+                  return formatTime(inc.incident_time);
+                } catch (error) {
+                  return "Just now";
+                }
+              })()}
             </span>
+
             <span className="flex items-center gap-1.5 text-[12.5px] text-gray-500">
               <MessageSquare size={13} className="text-emerald-mid" /> Via {inc.reporting_channel}
             </span>
@@ -88,9 +113,12 @@ export function LiveFeed({
 
           <div className="flex items-center justify-between">
             <SeverityBadge severity={inc.severity_level} />
-            {inc.follow_up_status === "New"? (
+            {inc.follow_up_status === "New" ? (
               <button
-                onClick={(e) => { e.stopPropagation(); handleAck(inc); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAck(inc);
+                }}
                 disabled={acknowledge.isPending}
                 className="flex items-center gap-1.5 px-4 py-2 bg-sidebar text-white text-[13px] font-medium rounded-lg hover:bg-emerald-sp transition-colors disabled:opacity-60"
               >
@@ -114,7 +142,7 @@ export function AlertsPanel({ alerts }: { alerts: ActiveAlert[] }) {
   const iconMap: Record<string, { bg: string; icon: React.ReactNode }> = {
     critical: { bg: "bg-danger-light", icon: <Shield size={17} className="text-danger" /> },
     warning:  { bg: "bg-warning-light", icon: <AlertTriangle size={17} className="text-warning" /> },
-    info:     { bg: "bg-blue-50",      icon: <AlertTriangle size={17} className="text-blue-500" /> },
+    info:     { bg: "bg-blue-50",       icon: <AlertTriangle size={17} className="text-blue-500" /> },
   };
 
   const titleColor: Record<string, string> = {
@@ -127,7 +155,6 @@ export function AlertsPanel({ alerts }: { alerts: ActiveAlert[] }) {
     <div className="space-y-2">
       {alerts.map((alert) => {
         const config = iconMap[alert.type] ?? { bg: "bg-gray-50", icon: <AlertTriangle size={17} /> };
-        const colorClass = titleColor[alert.type] ?? "text-gray-600";
         return (
           <div
             key={alert.id}
