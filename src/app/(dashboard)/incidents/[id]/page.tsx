@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import {
   useIncident, useAcknowledgeIncident,
   useAssignIncident, useConfirmContacts,
-  useCloseIncident, useTeam, useTrustedContacts, // 🟢 Added our dedicated hook import
+  useCloseIncident, useTeam, useTrustedContacts,
 } from "@/hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { Skeleton } from "@/components/ui";
@@ -19,8 +19,8 @@ import { DeviceHistoryPanel } from "@/components/incidents/DeviceHistoryPanel";
 import { cn } from "@/utils";
 
 const SEV = {
-  Critical: { dot: "bg-red-500",  badge: "bg-red-50 text-red-500 border-red-200",         text: "text-red-500"    },
-  High:     { dot: "bg-orange-500", badge: "bg-orange-50 text-orange-500 border-orange-200", text: "text-orange-500" },
+  Critical: { dot: "bg-red-500",    badge: "bg-red-50 text-red-500 border-red-200",         text: "text-red-500"    },
+  High:      { dot: "bg-orange-500", badge: "bg-orange-50 text-orange-500 border-orange-200", text: "text-orange-500" },
   Medium:   { dot: "bg-yellow-500", badge: "bg-yellow-50 text-yellow-600 border-yellow-200", text: "text-yellow-600" },
   Low:      { dot: "bg-green-500",  badge: "bg-green-50 text-green-600 border-green-200",    text: "text-green-600"  },
 };
@@ -47,9 +47,9 @@ export default function IncidentDetailPage({
   const { data: incident, isLoading } = useIncident(Number(id));
   const { data: team = [] }           = useTeam();
 
-  // 🟢 Query the standalone backend endpoint using the phone_hash from the loaded incident
+  // 🟢 FIXED: Changed from phone_hash to device_hash to match the model contract
   const { data: trustedContacts = [], isLoading: isLoadingContacts } = useTrustedContacts(
-    incident?.phone_hash ?? ""
+    incident?.device_hash ?? ""
   );
 
   const acknowledge     = useAcknowledgeIncident();
@@ -99,7 +99,6 @@ export default function IncidentDetailPage({
   const isAssigned     = !!incident.assignment;
   const assignedToMe   = incident.assignment?.assigned_to?.id === user?.id;
   
-  // 🟢 Checking absolute structural flags from database state
   const isClosed       = incident.follow_up_status === "Closed";
 
   const contactsConfirmed = incident.timeline?.some(
@@ -388,231 +387,4 @@ export default function IncidentDetailPage({
               </div>
             ) : trustedContacts.length > 0 ? (
               <>
-                <div className="overflow-hidden rounded-xl border border-gray-100 mb-4">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-surface-secondary">
-                        {["NAME", "RELATION", "PHONE NO", "STATUS"].map((h) => (
-                          <th key={h} className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {trustedContacts.map((c: any, i: number) => (
-                        <tr key={i} className="border-t border-gray-50">
-                          <td className="px-4 py-3.5 text-[13.5px] font-medium text-gray-800">{c.name}</td>
-                          <td className="px-4 py-3.5 text-[13.5px] text-gray-500">{c.relationship || c.relation}</td>
-                          <td className="px-4 py-3.5 text-[13.5px] text-gray-500 font-mono">{c.phone_number || c.phone}</td>
-                          <td className="px-4 py-3.5 text-[13.5px]">
-                            <span className="text-emerald-mid font-medium text-[12px] bg-emerald-light/20 px-2 py-0.5 rounded-md">
-                              ✓ Alerted
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {role === "FIELD_STAFF" && assignedToMe && !contactsConfirmed && !isClosed && (
-                  <button
-                    onClick={handleConfirmContacts}
-                    disabled={confirmContacts.isPending}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-purple-500 text-white text-[13.5px] font-semibold rounded-[10px] hover:bg-purple-600 transition-colors disabled:opacity-60"
-                  >
-                    <Phone size={15} />
-                    {confirmContacts.isPending ? "Confirming…" : "Confirm trusted contacts have been notified"}
-                  </button>
-                )}
-
-                {contactsConfirmed && (
-                  <div className="flex items-center gap-2 bg-purple-50 border border-purple-100 rounded-xl p-3 mt-2">
-                    <CheckCircle size={15} className="text-purple-500" />
-                    <p className="text-[13px] font-medium text-purple-700">
-                      Trusted contacts have been confirmed notified
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="flex items-center gap-3 bg-orange-50 border border-orange-100 rounded-xl p-4">
-                <XCircle size={18} className="text-orange-400 flex-shrink-0" />
-                <div>
-                  <p className="text-[13.5px] font-semibold text-orange-700">
-                    No trusted contacts registered
-                  </p>
-                  <p className="text-[12px] text-orange-600 mt-0.5">
-                    This device has no emergency contacts listed on file. Field staff should run localized direct client confirmation.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── Right column — Location & Device Tracking ── */}
-        <div>
-          <div className="bg-white rounded-[14px] border border-gray-100 shadow-card p-6 mb-5">
-            <h2 className="text-[15px] font-semibold text-gray-900 mb-4">Location</h2>
-            {hasGPS && incident.latitude && incident.longitude ? (
-              <IncidentMap
-                latitude={incident.latitude}
-                longitude={incident.longitude}
-                location={incident.location}
-                severity={incident.severity_level}
-                height={320}
-              />
-            ) : (
-              <iframe
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=3.1,6.3,3.6,6.7&layer=mapnik`}
-                className="w-full rounded-xl border border-gray-100"
-                style={{ height: 320 }}
-                title="Location map"
-              />
-            )}
-            <p className="text-[12px] text-gray-500 mt-3 flex items-center gap-1.5">
-              <MapPin size={12} className="text-emerald-mid" />
-              {incident.location}
-            </p>
-          </div>
-          
-          {/* Device tracking history is now safely injected with the true DB record tracking token */}
-          {incident.device_hash && (
-            <DeviceHistoryPanel deviceHash={incident.device_hash} />
-          )}
-        </div>
-      </div>
-
-      {/* ── Assign Modal ── */}
-      {showAssignModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] p-6 w-full max-w-md shadow-modal">
-            <h2 className="text-[17px] font-semibold mb-1">Assign incident</h2>
-            <p className="text-[13px] text-gray-400 mb-5">
-              Select a field staff member to handle this case
-            </p>
-
-            {team.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <Users size={32} className="mx-auto mb-2 opacity-40" />
-                <p className="text-[13.5px]">No field staff in your organisation yet</p>
-              </div>
-            ) : (
-              <div className="space-y-2 mb-5 max-h-64 overflow-y-auto">
-                {team.map((member) => (
-                  <button
-                    key={member.id}
-                    onClick={() => setSelectedStaff(member.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 p-3.5 rounded-xl border-[1.5px] transition-all text-left",
-                      selectedStaff === member.id
-                        ? "border-emerald-mid bg-emerald-pale"
-                        : "border-gray-200 hover:border-emerald-mid"
-                    )}
-                  >
-                    <div className="w-9 h-9 rounded-full bg-emerald-mid/70 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-                      {(member.first_name?.[0] ?? member.username?.[0] ?? "U").toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-[13.5px] font-semibold text-gray-900">
-                        {member.first_name
-                          ? `${member.first_name} ${member.last_name}`
-                          : member.username}
-                      </p>
-                      <p className="text-[12px] text-gray-400 capitalize">
-                        {member.role?.replace("_", " ").toLowerCase()}
-                      </p>
-                    </div>
-                    {selectedStaff === member.id && (
-                      <CheckCircle size={16} className="text-emerald-mid ml-auto" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => setShowAssignModal(false)}
-                className="flex-1 py-2.5 border-[1.5px] border-gray-200 text-sm font-medium rounded-[10px] hover:border-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAssign}
-                disabled={!selectedStaff || assign.isPending}
-                className="flex-1 py-2.5 bg-sidebar text-white text-sm font-medium rounded-[10px] hover:bg-emerald-sp transition-colors disabled:opacity-50"
-              >
-                {assign.isPending ? "Assigning…" : "Assign"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Close Case Modal ── */}
-      {showCloseModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[16px] p-6 w-full max-w-md shadow-modal">
-            <h2 className="text-[17px] font-semibold mb-1">Close case</h2>
-            <p className="text-[13px] text-gray-400 mb-5">
-              Confirm the support provided before closing
-            </p>
-
-            <div className="mb-4">
-              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
-                Support provided
-              </label>
-              <select
-                value={supportProvided}
-                onChange={(e) => setSupportProvided(e.target.value)}
-                className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-[9px] text-sm outline-none focus:border-emerald-mid"
-              >
-                <option value="">Select…</option>
-                <option value="Counseling">Counseling</option>
-                <option value="Medical Care">Medical Care</option>
-                <option value="Legal Aid">Legal Aid</option>
-                <option value="Shelter">Shelter</option>
-                <option value="Safe House">Safe House</option>
-                <option value="Police Report">Police Report Filed</option>
-                <option value="Referral">Referral to partner NGO</option>
-                <option value="Follow-up scheduled">Follow-up scheduled</option>
-              </select>
-            </div>
-
-            <div className="mb-5">
-              <label className="block text-[12.5px] font-medium text-gray-700 mb-1.5">
-                Closing notes
-              </label>
-              <textarea
-                value={closeNotes}
-                onChange={(e) => setCloseNotes(e.target.value)}
-                rows={3}
-                placeholder="Summary of actions taken…"
-                className="w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-[9px] text-sm outline-none focus:border-emerald-mid resize-none"
-              />
-            </div>
-
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => setShowCloseModal(false)}
-                className="flex-1 py-2.5 border-[1.5px] border-gray-200 text-sm font-medium rounded-[10px]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleClose}
-                disabled={closeIncident.isPending}
-                className="flex-1 py-2.5 bg-emerald-mid text-white text-sm font-medium rounded-[10px] hover:bg-emerald-sp transition-colors disabled:opacity-50"
-              >
-                {closeIncident.isPending ? "Closing…" : "Close case"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+                <div className="overflow-hidden rounded-xl border border-gray
