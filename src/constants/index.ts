@@ -10,9 +10,9 @@ export const INCIDENT_ENDPOINTS = {
   CONFIRM_CONTACTS: (id: number) => `/api/incidents/incidents/${id}/confirm-contacts/`,
   CLOSE:            (id: number) => `/api/incidents/incidents/${id}/close/`,
   DEVICE_HISTORY: (hash: string) => `/api/incidents/device/${hash}/`,
-  DASHBOARD:             "/api/dashboard/",
-  FIELD_DASHBOARD:       "/api/field-dashboard/",
-  COORDINATOR_DASHBOARD: "/api/coordinator-dashboard/",
+  DASHBOARD:             "/api/incidents/dashboard/",
+  FIELD_DASHBOARD:       "/api/incidents/field-dashboard/",
+  COORDINATOR_DASHBOARD: "/api/incidents/coordinator-dashboard/",
 } as const;
 
 export const AUTH_ENDPOINTS = {
