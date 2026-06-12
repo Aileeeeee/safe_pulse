@@ -86,7 +86,6 @@ export function LiveFeed({
                 try {
                   if (!inc.incident_time) return "Just now";
                   
-                  // If it's already structured text like "09:21 PM", bypass utilities
                   if (
                     typeof inc.incident_time === "string" &&
                     (inc.incident_time.includes("AM") || inc.incident_time.includes("PM"))
@@ -94,7 +93,6 @@ export function LiveFeed({
                     return inc.incident_time;
                   }
 
-                  // Verify timestamp before running formatTime utility
                   if (isNaN(Date.parse(inc.incident_time))) {
                     return "Just now";
                   }
@@ -113,7 +111,9 @@ export function LiveFeed({
 
           <div className="flex items-center justify-between">
             <SeverityBadge severity={inc.severity_level} />
-            {inc.follow_up_status === "New" ? (
+            
+            {/* 🟢 FIXED: Checking the absolute backend boolean flag instead of a mutable string status */}
+            {!inc.is_acknowledged ? (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -126,7 +126,7 @@ export function LiveFeed({
                 Acknowledge
               </button>
             ) : (
-              <span className="text-[12px] text-emerald-mid font-medium flex items-center gap-1">
+              <span className="text-[12px] text-emerald-mid font-medium flex items-center gap-1 bg-emerald-light/20 px-2.5 py-1 rounded-md">
                 <CheckCircle size={13} /> Acknowledged
               </span>
             )}
