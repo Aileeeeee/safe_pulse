@@ -70,6 +70,20 @@ export const incidentService = {
     );
     return data;
   },
+
+  /**
+   * POST or PATCH /api/incidents/:id/close/
+   */
+  async close(
+    id: number, 
+    payload: { support_provided?: string; notes?: string }
+  ): Promise<any> {
+    const { data } = await api.post(
+      INCIDENT_ENDPOINTS.CLOSE(id), // Make sure this exists in constants
+      payload
+    );
+    return data;
+  },
 };
 
 
