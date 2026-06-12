@@ -34,11 +34,11 @@ export const incidentService = {
   },
 
   /**
-   * POST /api/incidents/incidents/:id/acknowledge/
+   * PATCH /api/incidents/incidents/<id>/acknowledge/
    */
- async acknowledge(id: number): Promise<{ message: string; acknowledged_at: string }> {
+  async acknowledge(id: number): Promise<{ message: string; acknowledged_at: string }> {
     const { data } = await api.patch<{ message: string; acknowledged_at: string }>(
-      INCIDENT_ENDPOINTS.ACKNOWLEDGE(id)  // ← patch not post
+      INCIDENT_ENDPOINTS.ACKNOWLEDGE(id)
     );
     return data;
   },
@@ -51,59 +51,57 @@ export const incidentService = {
   },
 
   /**
-   * POST /api/incidents/:id/assign/
+   * POST /api/incidents/incidents/<id>/assign/
    */
   async assign(id: number, assigned_to: number, notes?: string): Promise<any> {
     const { data } = await api.post(
-      INCIDENT_ENDPOINTS.ASSIGN(id), // Ensure this endpoint exists in your constants
+      INCIDENT_ENDPOINTS.ASSIGN(id), 
       { assigned_to, notes }
     );
     return data;
   },
 
   /**
-   * POST /api/incidents/:id/confirm-contacts/
+   * POST /api/incidents/incidents/<id>/confirm-contacts/
    */
   async confirmContacts(id: number): Promise<any> {
     const { data } = await api.post(
-      INCIDENT_ENDPOINTS.CONFIRM_CONTACTS(id) // Or your specific endpoint constant
+      INCIDENT_ENDPOINTS.CONFIRM_CONTACTS(id)
     );
     return data;
   },
 
   /**
-   * POST or PATCH /api/incidents/:id/close/
+   * POST /api/incidents/incidents/<id>/close/
    */
   async close(
     id: number, 
     payload: { support_provided?: string; notes?: string }
   ): Promise<any> {
     const { data } = await api.post(
-      INCIDENT_ENDPOINTS.CLOSE(id), // Make sure this exists in constants
+      INCIDENT_ENDPOINTS.CLOSE(id),
       payload
     );
     return data;
   },
 
   /**
-   * Fetches the location and connection tracking log for an active device.
-   * GET /api/incidents/device-history/{device_hash}/
+   * 🚨 FIXED: Combined with project-level prefix
+   * GET /api/incidents/device/{device_hash}/
    */
   async getDeviceHistory(deviceHash: string): Promise<any> {
-    const { data } = await api.get(`/api/incidents/device-history/${deviceHash}/`);
+    const { data } = await api.get(`/api/incidents/device/${deviceHash}/`);
     return data;
   },
   
   /**
-   * Fetches the emergency trusted contacts tied to a victim's phone number.
-   * GET /api/incidents/trusted-contacts/?phone_hash={phone_hash}
+   * 🚨 FIXED: Combined with project-level prefix
+   * GET /api/incidents/contacts/?phone_hash={phone_hash}
    */
   async getTrustedContacts(phoneHash: string): Promise<any> {
-    const { data } = await api.get(`/api/incidents/trusted-contacts/`, {
+    const { data } = await api.get(`/api/incidents/contacts/`, {
       params: { phone_hash: phoneHash },
     });
     return data;
   }
 };
-
-
