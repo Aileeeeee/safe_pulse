@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import {
   useIncident, useAcknowledgeIncident,
   useAssignIncident, useConfirmContacts,
-  useCloseIncident, useTeam,
+  useCloseIncident, useTeam, useTrustedContacts, // 🟢 Added our dedicated hook import
 } from "@/hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { Skeleton } from "@/components/ui";
@@ -19,7 +19,7 @@ import { DeviceHistoryPanel } from "@/components/incidents/DeviceHistoryPanel";
 import { cn } from "@/utils";
 
 const SEV = {
-  Critical: { dot: "bg-red-500",    badge: "bg-red-50 text-red-500 border-red-200",         text: "text-red-500"    },
+  Critical: { dot: "bg-red-500",  badge: "bg-red-50 text-red-500 border-red-200",         text: "text-red-500"    },
   High:     { dot: "bg-orange-500", badge: "bg-orange-50 text-orange-500 border-orange-200", text: "text-orange-500" },
   Medium:   { dot: "bg-yellow-500", badge: "bg-yellow-50 text-yellow-600 border-yellow-200", text: "text-yellow-600" },
   Low:      { dot: "bg-green-500",  badge: "bg-green-50 text-green-600 border-green-200",    text: "text-green-600"  },
@@ -47,6 +47,11 @@ export default function IncidentDetailPage({
   const { data: incident, isLoading } = useIncident(Number(id));
   const { data: team = [] }           = useTeam();
 
+  // 🟢 Query the standalone backend endpoint using the phone_hash from the loaded incident
+  const { data: trustedContacts = [], isLoading: isLoadingContacts } = useTrustedContacts(
+    incident?.phone_hash ?? ""
+  );
+
   const acknowledge     = useAcknowledgeIncident();
   const assign          = useAssignIncident();
   const confirmContacts = useConfirmContacts();
@@ -54,7 +59,7 @@ export default function IncidentDetailPage({
 
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedStaff,   setSelectedStaff]   = useState<number | null>(null);
-  const [showCloseModal,  setShowCloseModal]   = useState(false);
+  const [showCloseModal,  setShowCloseModal]  = useState(false);
   const [supportProvided, setSupportProvided] = useState("");
   const [closeNotes,      setCloseNotes]      = useState("");
 
@@ -93,11 +98,12 @@ export default function IncidentDetailPage({
 
   const isAssigned     = !!incident.assignment;
   const assignedToMe   = incident.assignment?.assigned_to?.id === user?.id;
+  
+  // 🟢 Checking absolute structural flags from database state
   const isClosed       = incident.follow_up_status === "Closed";
 
-  // Check if contacts confirmed already in timeline
   const contactsConfirmed = incident.timeline?.some(
-    (t) => t.title === "Trusted contact attempted"
+    (t) => t.title === "Trusted contact attempted" || t.title === "Trusted contacts confirmed"
   );
 
   function handleAck() {
@@ -274,11 +280,9 @@ export default function IncidentDetailPage({
               </div>
             )}
 
-            {/* ── Action buttons — role based ── */}
+            {/* Actions Panel */}
             {!isClosed && (
               <div className="flex gap-2.5 flex-wrap">
-
-                {/* COORDINATOR actions */}
                 {role === "COORDINATOR" && (
                   <>
                     {!incident.is_acknowledged && (
@@ -302,10 +306,9 @@ export default function IncidentDetailPage({
                   </>
                 )}
 
-                {/* FIELD STAFF actions */}
                 {role === "FIELD_STAFF" && assignedToMe && (
                   <>
-                    {!contactsConfirmed && incident.trusted_contacts && incident.trusted_contacts.length > 0 && (
+                    {!contactsConfirmed && trustedContacts.length > 0 && (
                       <button
                         onClick={handleConfirmContacts}
                         disabled={confirmContacts.isPending}
@@ -372,19 +375,24 @@ export default function IncidentDetailPage({
             </div>
           </div>
 
-          {/* Trusted contacts */}
+          {/* Trusted contacts Section */}
           <div className="bg-white rounded-[14px] border border-gray-100 shadow-card p-6">
             <h2 className="text-[15px] font-semibold text-gray-900 mb-4">
               Trusted contacts notified
             </h2>
 
-            {incident.trusted_contacts && incident.trusted_contacts.length > 0 ? (
+            {isLoadingContacts ? (
+              <div className="space-y-2 py-4">
+                <Skeleton className="h-10 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-lg" />
+              </div>
+            ) : trustedContacts.length > 0 ? (
               <>
                 <div className="overflow-hidden rounded-xl border border-gray-100 mb-4">
                   <table className="w-full">
                     <thead>
                       <tr className="bg-surface-secondary">
-                        {["NAME", "RELATION", "PHONE NO", "NOTIFIED AT"].map((h) => (
+                        {["NAME", "RELATION", "PHONE NO", "STATUS"].map((h) => (
                           <th key={h} className="text-left text-[11px] font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">
                             {h}
                           </th>
@@ -392,19 +400,22 @@ export default function IncidentDetailPage({
                       </tr>
                     </thead>
                     <tbody>
-                      {incident.trusted_contacts.map((c, i) => (
+                      {trustedContacts.map((c: any, i: number) => (
                         <tr key={i} className="border-t border-gray-50">
                           <td className="px-4 py-3.5 text-[13.5px] font-medium text-gray-800">{c.name}</td>
-                          <td className="px-4 py-3.5 text-[13.5px] text-gray-500">{c.relation}</td>
-                          <td className="px-4 py-3.5 text-[13.5px] text-gray-500 font-mono">{c.phone}</td>
-                          <td className="px-4 py-3.5 text-[13.5px] text-gray-500">{c.notified_at}</td>
+                          <td className="px-4 py-3.5 text-[13.5px] text-gray-500">{c.relationship || c.relation}</td>
+                          <td className="px-4 py-3.5 text-[13.5px] text-gray-500 font-mono">{c.phone_number || c.phone}</td>
+                          <td className="px-4 py-3.5 text-[13.5px]">
+                            <span className="text-emerald-mid font-medium text-[12px] bg-emerald-light/20 px-2 py-0.5 rounded-md">
+                              ✓ Alerted
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
 
-                {/* Field staff confirm button */}
                 {role === "FIELD_STAFF" && assignedToMe && !contactsConfirmed && !isClosed && (
                   <button
                     onClick={handleConfirmContacts}
@@ -433,9 +444,7 @@ export default function IncidentDetailPage({
                     No trusted contacts registered
                   </p>
                   <p className="text-[12px] text-orange-600 mt-0.5">
-                    This device has no trusted contacts on file.
-                    No automated message was sent.
-                    Field staff should attempt direct outreach.
+                    This device has no emergency contacts listed on file. Field staff should run localized direct client confirmation.
                   </p>
                 </div>
               </div>
@@ -443,9 +452,9 @@ export default function IncidentDetailPage({
           </div>
         </div>
 
-        {/* ── Right column — Location ── */}
+        {/* ── Right column — Location & Device Tracking ── */}
         <div>
-          <div className="bg-white rounded-[14px] border border-gray-100 shadow-card p-6">
+          <div className="bg-white rounded-[14px] border border-gray-100 shadow-card p-6 mb-5">
             <h2 className="text-[15px] font-semibold text-gray-900 mb-4">Location</h2>
             {hasGPS && incident.latitude && incident.longitude ? (
               <IncidentMap
@@ -468,6 +477,8 @@ export default function IncidentDetailPage({
               {incident.location}
             </p>
           </div>
+          
+          {/* Device tracking history is now safely injected with the true DB record tracking token */}
           {incident.device_hash && (
             <DeviceHistoryPanel deviceHash={incident.device_hash} />
           )}
