@@ -104,29 +104,48 @@ export function useAcknowledgeIncident() {
     mutationFn: ({ id }: { id: number }) =>
       incidentService.acknowledge(id),
 
-    // Optimistic update — flip is_acknowledged immediately in UI
     onMutate: async ({ id }) => {
       await qc.cancelQueries({ queryKey: QUERY_KEYS.INCIDENT(id) });
       const prev = qc.getQueryData(QUERY_KEYS.INCIDENT(id));
-      qc.setQueryData(QUERY_KEYS.INCIDENT(id), (old: unknown) =>
-        old
-          ? {
-              ...(old as object),
-              is_acknowledged:  true,
-              acknowledged_at:  new Date().toISOString(),
-            }
-          : old
-      );
+      
+      qc.setQueryData(QUERY_KEYS.INCIDENT(id), (old: any) => {
+        if (!old) return old;
+
+        // Create a safe mock format mirroring your Django strftime('%I:%M %p') format
+        const now = new Date();
+        const formattedTime = now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        // Safe clone deep append to match timeline types
+        const updatedTimeline = old.timeline ? [...old.timeline] : [];
+        
+        // If there's a timeline array, safely update or append to it
+        updatedTimeline.unshift({
+          time: formattedTime, // 🚨 Matches backend human string lookups
+          title: 'Triage completed',
+          description: 'Assigned priority',
+          color: 'orange',
+          status: 'done'
+        });
+
+        return {
+          ...old,
+          is_acknowledged: true,
+          acknowledged_at: now.toISOString(), // Keep if main table relies on this
+          timeline: updatedTimeline
+        };
+      });
       return { prev };
     },
 
     onError: (_err, { id }, ctx) => {
-      // Roll back if API call fails
       qc.setQueryData(QUERY_KEYS.INCIDENT(id), ctx?.prev);
     },
 
     onSettled: () => {
-      // Refetch everything to sync with server
       qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENTS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
     },
