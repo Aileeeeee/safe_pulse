@@ -84,6 +84,26 @@ export const incidentService = {
     );
     return data;
   },
+
+  /**
+   * Fetches the location and connection tracking log for an active device.
+   * GET /api/incidents/device-history/{device_hash}/
+   */
+  async getDeviceHistory(deviceHash: string): Promise<any> {
+    const { data } = await api.get(`/api/incidents/device-history/${deviceHash}/`);
+    return data;
+  },
+  
+  /**
+   * Fetches the emergency trusted contacts tied to a victim's phone number.
+   * GET /api/incidents/trusted-contacts/?phone_hash={phone_hash}
+   */
+  async getTrustedContacts(phoneHash: string): Promise<any> {
+    const { data } = await api.get(`/api/incidents/trusted-contacts/`, {
+      params: { phone_hash: phoneHash },
+    });
+    return data;
+  }
 };
 
 
