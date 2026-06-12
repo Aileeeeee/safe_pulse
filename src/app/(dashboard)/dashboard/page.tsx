@@ -317,7 +317,13 @@ function FieldStaffDashboard() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock size={12} className="text-emerald-mid" />
-                  {new Date(inc.created_at).toLocaleDateString("en-NG")}
+                  {/* Fixed: Safely falls back if inc.created_at is null or malformed */}
+                  {(() => {
+                    const parsedDate = new Date(inc.created_at);
+                    return !isNaN(parsedDate.getTime())
+                      ? parsedDate.toLocaleDateString("en-NG")
+                      : "Date unavailable";
+                  })()}
                 </span>
               </div>
             </div>
