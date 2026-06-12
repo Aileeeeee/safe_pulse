@@ -201,18 +201,23 @@ export function useTeam() {
 }
 
 export function useDeviceHistory(deviceHash: string) {
+  // Check if hash exists and isn't a generic placeholder string
+  const isValidHash = !!deviceHash && !deviceHash.toUpperCase().includes("UNREGIST");
+
   return useQuery({
     queryKey: ["deviceHistory", deviceHash],
     queryFn: () => incidentService.getDeviceHistory(deviceHash),
-    enabled: !!deviceHash, // Only run the query if a device hash actually exists
+    enabled: isValidHash,
   });
 }
 
 export function useTrustedContacts(phoneHash: string) {
+  // Check if hash exists and isn't a generic placeholder string
+  const isValidHash = !!phoneHash && !phoneHash.toUpperCase().includes("UNREGIST");
+
   return useQuery({
     queryKey: ["trustedContacts", phoneHash],
     queryFn: () => incidentService.getTrustedContacts(phoneHash),
-    enabled: !!phoneHash, // Only run the query if a phone hash actually exists
+    enabled: isValidHash,
   });
 }
-  
