@@ -4,40 +4,52 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, MapPin, Bell, BarChart2,
-  Users, FileText, Settings, LogOut, Menu, X,
+  Users, FileText, Settings, LogOut, X,
 } from "lucide-react";
 import { cn } from "@/utils";
 import { useLogout } from "@/hooks";
 import { useAuthStore } from "@/store/auth.store";
 import { Topbar } from "./Topbar";
 
-const nav = [
-  { label: "Dashboard",    href: "/dashboard",  icon: LayoutDashboard },
-  { label: "Incidents",    href: "/incidents",  icon: MapPin,  badge: "13" },
-  { label: "Reports",      href: "/reports",    icon: FileText }, 
-  { label: "Alerts",       href: "/alerts",     icon: Bell,    badge: "3" },
-  { label: "Analytics",   href: "/analytics",  icon: BarChart2,  section: "Operations" },
-  { label: "Team",         href: "/team",       icon: Users },
-  { label: "Activity Log", href: "/activity",   icon: FileText },
-  { label: "Settings",     href: "/settings",   icon: Settings, section: "Configuration" },
-];
+type NavItem = {
+  label:    string;
+  href:     string;
+  icon:     React.ComponentType<{ size?: number; className?: string }>;
+  badge?:   string;
+  section?: string;
+};
 
+// ─── Component ───
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname  = usePathname();
   const logout    = useLogout();
   const user      = useAuthStore((s) => s.user);
   const [open, setOpen] = useState(false);
 
-  // ✅ Now safe because first_name and last_name are always filled on signup
+  const role = user?.role ?? "FIELD_STAFF";
+
+  // Moved the navigation definition inside the component so it can reactively check roles safely
+  const nav: NavItem[] = [
+    { label: "Dashboard",   href: "/dashboard",  icon: LayoutDashboard },
+    { label: "Incidents",   href: "/incidents",  icon: MapPin },
+    { label: "Reports",     href: "/reports",    icon: FileText },
+    { label: "Alerts",      href: "/alerts",     icon: Bell },
+    { label: "Analytics",   href: "/analytics",  icon: BarChart2, section: "Operations" },
+    ...(role !== "FIELD_STAFF" ? [
+      { label: "Team", href: "/team", icon: Users }
+    ] as NavItem[] : []),
+    { label: "Activity Log", href: "/activity",   icon: FileText },
+    { label: "Settings",     href: "/settings",   icon: Settings, section: "Configuration" },
+  ];
+
   const initials = user
     ? `${user.first_name?.[0] ?? ""}${user.last_name?.[0] ?? ""}`.toUpperCase() || "SP"
     : "SP";
 
-  // Display name
-  {user?.first_name
+  // Fixed the dangling display name statement block and assigned it safely
+  const displayName = user?.first_name
     ? `${user.first_name} ${user.last_name}`
-    : user?.username ?? "User"
-  }
+    : user?.username ?? "User";
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -113,7 +125,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-medium text-white truncate">
-              {user ? `${user.first_name} ${user.last_name}` : "Admin"}
+              {displayName}
             </p>
             <p className="text-[11px] text-white/40 truncate capitalize">
               {user?.role?.replace("_", " ") ?? "NGO Administrator"}

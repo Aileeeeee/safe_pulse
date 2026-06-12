@@ -8,10 +8,6 @@ import type {
 } from "@/types";
 
 export const incidentService = {
-  /**
-   * GET /api/incidents/coordinator-dashboard/
-   * For NGO Coordinators — sees all incidents in their state
-   */
   async coordinatorDashboard(): Promise<CoordinatorDashboard> {
     const { data } = await api.get<CoordinatorDashboard>(
       INCIDENT_ENDPOINTS.COORDINATOR_DASHBOARD
@@ -30,9 +26,6 @@ export const incidentService = {
     return data;
   },
 
-  /**
-   * GET /api/incidents/incidents/:id/
-   */
   async detail(id: number): Promise<Incident> {
     const { data } = await api.get<Incident>(
       INCIDENT_ENDPOINTS.DETAIL(id)
@@ -57,3 +50,5 @@ export const incidentService = {
     return data;
   },
 };
+
+

@@ -66,4 +66,9 @@ export const authService = {
     );
     return data;
   },
+
+  async getTeam(): Promise<User[]> {
+    const { data } = await api.get<User[]>(AUTH_ENDPOINTS.TEAM);
+    return data;
+  },
 };

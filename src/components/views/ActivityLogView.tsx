@@ -1,5 +1,4 @@
 "use client";
-
 import { PageHeader } from "@/components/ui/PageHeader";
 
 const LOGS = [
@@ -12,7 +11,7 @@ const LOGS = [
   { emoji: "🔴", bg: "#fde8e8", action: "New SOS pulse received from Ikeja — incident", highlight: "#2347", meta: "created automatically", time: "09:00 AM" },
 ];
 
-export default function ActivityPage() {
+export default function ActivityLogView() {
   return (
     <div>
       <PageHeader title="Activity Log" subtitle="Full audit trail of platform actions" />
