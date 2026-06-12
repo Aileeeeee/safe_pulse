@@ -4,6 +4,7 @@ import type {
   Incident,
   CoordinatorDashboard,
   IncidentFilters,
+  FieldStaffDashboard,
 } from "@/types";
 
 export const incidentService = {
@@ -14,17 +15,6 @@ export const incidentService = {
   async coordinatorDashboard(): Promise<CoordinatorDashboard> {
     const { data } = await api.get<CoordinatorDashboard>(
       INCIDENT_ENDPOINTS.COORDINATOR_DASHBOARD
-    );
-    return data;
-  },
-
-  /**
-   * GET /api/incidents/dashboard/
-   * For Field Staff — filtered by region
-   */
-  async fieldStaffDashboard(): Promise<CoordinatorDashboard> {
-    const { data } = await api.get<CoordinatorDashboard>(
-      INCIDENT_ENDPOINTS.DASHBOARD
     );
     return data;
   },
@@ -56,6 +46,13 @@ export const incidentService = {
  async acknowledge(id: number): Promise<{ message: string; acknowledged_at: string }> {
     const { data } = await api.patch<{ message: string; acknowledged_at: string }>(
       INCIDENT_ENDPOINTS.ACKNOWLEDGE(id)  // ← patch not post
+    );
+    return data;
+  },
+
+  async fieldStaffDashboard(): Promise<FieldStaffDashboard> {
+    const { data } = await api.get<FieldStaffDashboard>(
+      INCIDENT_ENDPOINTS.FIELD_DASHBOARD
     );
     return data;
   },

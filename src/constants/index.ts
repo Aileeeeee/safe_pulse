@@ -16,6 +16,7 @@ export const INCIDENT_ENDPOINTS = {
   ACKNOWLEDGE:           (id: number) => `/api/incidents/incidents/${id}/acknowledge/`,
   DETAIL:                (id: number) => `/api/incidents/incidents/${id}/`,
   DASHBOARD:             "/api/incidents/dashboard/",
+  FIELD_DASHBOARD: "/api/incidents/field-dashboard/",
   COORDINATOR_DASHBOARD: "/api/incidents/coordinator-dashboard/",
 } as const;
 

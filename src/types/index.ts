@@ -119,6 +119,17 @@ export interface CoordinatorDashboard {
   incidents:               Incident[];
 }
 
+export interface FieldStaffDashboard {
+  role:             string;
+  organisation:     string;
+  state:            string;
+  total_assigned:   number;
+  ongoing:          number;
+  closed:           number;
+  critical_ongoing: number;
+  incidents:        Incident[];
+}
+
 export interface IncidentFilters {
   incident_type?:    string;
   severity_level?:   string;

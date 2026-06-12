@@ -68,7 +68,6 @@ export function useCoordinatorDashboard() {
   });
 }
 
-// Keep this for later when field staff dashboard is built
 export function useFieldStaffDashboard() {
   return useQuery({
     queryKey: [...QUERY_KEYS.DASHBOARD, "field"],
