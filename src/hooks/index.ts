@@ -3,10 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { authService } from "@/services/auth.service";
-import { incidentService } from "@/services/incidents.service";
+import { incidentService } from "@/services/incidents"; 
 import { useAuthStore } from "@/store/auth.store";
 import { QUERY_KEYS, REFRESH_KEY } from "@/constants";
 import type { IncidentFilters, LoginPayload, SignupPayload } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -195,6 +197,22 @@ export function useTeam() {
     queryKey: QUERY_KEYS.TEAM,
     queryFn:  authService.getTeam,
     staleTime: 60_000,
+  });
+}
+
+export function useDeviceHistory(deviceHash: string) {
+  return useQuery({
+    queryKey: ["deviceHistory", deviceHash],
+    queryFn: () => incidentService.getDeviceHistory(deviceHash),
+    enabled: !!deviceHash, // Only run the query if a device hash actually exists
+  });
+}
+
+export function useTrustedContacts(phoneHash: string) {
+  return useQuery({
+    queryKey: ["trustedContacts", phoneHash],
+    queryFn: () => incidentService.getTrustedContacts(phoneHash),
+    enabled: !!phoneHash, // Only run the query if a phone hash actually exists
   });
 }
   
