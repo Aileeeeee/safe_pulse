@@ -1,10 +1,11 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, MapPin, Clock, MessageSquare,
   CheckCircle, AlertTriangle, UserPlus,
-  Phone, Users, XCircle,
+  Phone, Users, XCircle, HelpCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -92,11 +93,16 @@ export default function IncidentDetailPage({
 
   const sev = SEV[incident.severity_level] ?? SEV.High;
   const hasGPS = !!(incident.latitude && incident.longitude);
-  const isPulse = incident.reporting_channel === "Mobile App" && incident.severity_level === "Critical";
+  
+  // Safe case-insensitive matching
+  const isPulse = 
+    incident.reporting_channel?.trim() === "Mobile App" && 
+    incident.severity_level?.toLowerCase().trim() === "critical";
 
   const isAssigned = !!incident.assignment;
   const assignedToMe = incident.assignment?.assigned_to?.id === user?.id;
   const isClosed = incident.follow_up_status === "Closed";
+  const isUnregistered = !!incident.device_hash?.toUpperCase().includes("UNREGIST");
 
   const contactsConfirmed = incident.timeline?.some(
     (t) => t.title === "Trusted contact attempted" || t.title === "Trusted contacts confirmed"
@@ -382,7 +388,19 @@ export default function IncidentDetailPage({
                 <Skeleton className="h-10 w-full rounded-lg" />
                 <Skeleton className="h-14 w-full rounded-lg" />
               </div>
-            ) : trustedContacts.length > 0 ? (
+            ) : isUnregistered ? (
+              <div className="flex items-start gap-3 bg-orange-50/60 border border-orange-100 rounded-xl p-4">
+                <HelpCircle size={18} className="text-orange-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[13.5px] font-semibold text-orange-800">
+                    Anonymous Mobile Transmission
+                  </p>
+                  <p className="text-[12px] text-orange-600 mt-0.5 leading-normal">
+                    This incident was triggered anonymously from an unregistered application source. No emergency profile or trusted contacts are linked to this transmission.
+                  </p>
+                </div>
+              </div>
+            ) : trustedContacts && trustedContacts.length > 0 ? (
               <>
                 <div className="overflow-hidden rounded-xl border border-gray-100 mb-4">
                   <table className="w-full">
