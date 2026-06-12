@@ -60,6 +60,16 @@ export const incidentService = {
     );
     return data;
   },
+
+  /**
+   * POST /api/incidents/:id/confirm-contacts/
+   */
+  async confirmContacts(id: number): Promise<any> {
+    const { data } = await api.post(
+      INCIDENT_ENDPOINTS.CONFIRM_CONTACTS(id) // Or your specific endpoint constant
+    );
+    return data;
+  },
 };
 
 
