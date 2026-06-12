@@ -10,7 +10,7 @@ import { QUERY_KEYS, REFRESH_KEY } from "@/constants";
 import type { IncidentFilters, LoginPayload, SignupPayload } from "@/types";
 
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
+// ─── Auth Hooks ───────────────────────────────────────────────────────────────
 
 export function useMe() {
   return useQuery({
@@ -37,7 +37,6 @@ export function useLogin() {
 export function useSignup() {
   return useMutation({
     mutationFn: (payload: SignupPayload) => authService.signup(payload),
-    // Don't redirect — SignupForm handles the OTP step after this
   });
 }
 
@@ -59,7 +58,8 @@ export function useLogout() {
   });
 }
 
-// Replace useDashboard and useCoordinatorDashboard with these:
+
+// ─── Dashboards & Lists Hooks ─────────────────────────────────────────────────
 
 export function useCoordinatorDashboard() {
   return useQuery({
@@ -84,7 +84,7 @@ export function useIncidents(filters?: IncidentFilters) {
     queryKey: [...QUERY_KEYS.INCIDENTS, filters],
     queryFn: async () => {
       const data = await incidentService.list(filters);
-      return data; // 
+      return data;
     },
     staleTime: 10_000,
     refetchInterval: 20_000,
@@ -98,6 +98,9 @@ export function useIncident(id: number) {
     enabled:  !!id,
   });
 }
+
+
+// ─── Case Mutation Action Hooks ───────────────────────────────────────────────
 
 export function useAcknowledgeIncident() {
   const qc = useQueryClient();
@@ -113,7 +116,6 @@ export function useAcknowledgeIncident() {
       qc.setQueryData(QUERY_KEYS.INCIDENT(id), (old: any) => {
         if (!old) return old;
 
-        // Create a safe mock format mirroring your Django strftime('%I:%M %p') format
         const now = new Date();
         const formattedTime = now.toLocaleTimeString("en-US", {
           hour: "2-digit",
@@ -121,22 +123,20 @@ export function useAcknowledgeIncident() {
           hour12: true,
         });
 
-        // Safe clone deep append to match timeline types
         const updatedTimeline = old.timeline ? [...old.timeline] : [];
         
-        // If there's a timeline array, safely update or append to it
         updatedTimeline.unshift({
-          time: formattedTime, // 🚨 Matches backend human string lookups
-          title: 'Triage completed',
-          description: 'Assigned priority',
-          color: 'orange',
-          status: 'done'
+          time: formattedTime,
+          title: "Triage completed",
+          description: "Assigned priority",
+          color: "orange",
+          status: "done"
         });
 
         return {
           ...old,
           is_acknowledged: true,
-          acknowledged_at: now.toISOString(), // Keep if main table relies on this
+          acknowledged_at: now.toISOString(),
           timeline: updatedTimeline
         };
       });
@@ -147,7 +147,8 @@ export function useAcknowledgeIncident() {
       qc.setQueryData(QUERY_KEYS.INCIDENT(id), ctx?.prev);
     },
 
-    onSettled: () => {
+    onSettled: (_, __, { id }) => {
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENT(id) });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.INCIDENTS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
     },
@@ -200,24 +201,33 @@ export function useTeam() {
   });
 }
 
+
+// ─── Device & Tracking Resolvers ──────────────────────────────────────────────
+
 export function useDeviceHistory(deviceHash: string) {
-  // Check if hash exists and isn't a generic placeholder string
-  const isValidHash = !!deviceHash && !deviceHash.toUpperCase().includes("UNREGIST");
+  // Guard clause against empty, "Unknown", or default unassigned hashes
+  const isValidHash = !!deviceHash && 
+    !deviceHash.toUpperCase().includes("UNREGIST") && 
+    deviceHash !== "Unknown";
 
   return useQuery({
     queryKey: ["deviceHistory", deviceHash],
     queryFn: () => incidentService.getDeviceHistory(deviceHash),
     enabled: isValidHash,
+    retry: false,
   });
 }
 
 export function useTrustedContacts(phoneHash: string) {
-  // Check if hash exists and isn't a generic placeholder string
-  const isValidHash = !!phoneHash && !phoneHash.toUpperCase().includes("UNREGIST");
+  // Guard clause matching the query string filter requirements
+  const isValidHash = !!phoneHash && 
+    !phoneHash.toUpperCase().includes("UNREGIST") && 
+    phoneHash !== "Unknown";
 
   return useQuery({
     queryKey: ["trustedContacts", phoneHash],
     queryFn: () => incidentService.getTrustedContacts(phoneHash),
     enabled: isValidHash,
+    retry: false,
   });
 }
