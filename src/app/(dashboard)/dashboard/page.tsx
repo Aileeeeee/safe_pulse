@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle, CheckCircle, Users,
@@ -19,14 +20,44 @@ import { toast } from "sonner";
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
-  const role = user?.role ?? "FIELD_STAFF";
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  if (role === "FIELD_STAFF") {
+  // 1. Force React to finish hydration before evaluation to prevent race conditions
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // 2. Render a clean layout state spinner until user session data is securely matched
+  if (!isHydrated || !user) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-4 border-emerald-sp border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm font-medium text-gray-500">Syncing secure profile session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Route strictly based on true database string matches
+  if (user.role === "FIELD_STAFF") {
     return <FieldStaffDashboard />;
   }
 
-  // COORDINATOR and ADMIN both use coordinator dashboard
-  return <CoordinatorDashboard />;
+  if (user.role === "COORDINATOR" || user.role === "ADMIN") {
+    return <CoordinatorDashboard />;
+  }
+
+  // Fallback for unauthorized/malformed profiles
+  return (
+    <div className="p-8 max-w-md mx-auto text-center space-y-2">
+      <AlertTriangle size={40} className="text-red-500 mx-auto" />
+      <h3 className="text-lg font-semibold text-gray-900">Access Restricted</h3>
+      <p className="text-sm text-gray-500">
+        Your assigned system profile structure lacks dashboard routing clearance.
+      </p>
+    </div>
+  );
 }
 
 // ── Coordinator / Admin Dashboard ─────────────────────────────────────────────
@@ -50,7 +81,7 @@ function CoordinatorDashboard() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
-        {isLoading ? (
+        ={isLoading ? (
           [1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)
         ) : (
           <>
@@ -317,7 +348,6 @@ function FieldStaffDashboard() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock size={12} className="text-emerald-mid" />
-                  {/* Fixed: Safely falls back if inc.created_at is null or malformed */}
                   {(() => {
                     const parsedDate = new Date(inc.created_at);
                     return !isNaN(parsedDate.getTime())
