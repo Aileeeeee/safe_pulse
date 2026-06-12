@@ -49,6 +49,17 @@ export const incidentService = {
     );
     return data;
   },
+
+  /**
+   * POST /api/incidents/:id/assign/
+   */
+  async assign(id: number, assigned_to: number, notes?: string): Promise<any> {
+    const { data } = await api.post(
+      INCIDENT_ENDPOINTS.ASSIGN(id), // Ensure this endpoint exists in your constants
+      { assigned_to, notes }
+    );
+    return data;
+  },
 };
 
 
