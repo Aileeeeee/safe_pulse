@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { authService } from "@/services/auth.service";
-import { incidentService } from "@/services/incidents"; 
+import { incidentService } from "@/services/incidents.service"; 
 import { useAuthStore } from "@/store/auth.store";
 import { QUERY_KEYS, REFRESH_KEY } from "@/constants";
 import type { IncidentFilters, LoginPayload, SignupPayload } from "@/types";
