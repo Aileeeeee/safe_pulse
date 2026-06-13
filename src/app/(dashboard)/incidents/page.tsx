@@ -8,10 +8,9 @@ import { PageHeader, Skeleton, EmptyState } from "@/components/ui";
 import { cn } from "@/utils";
 import type { Incident } from "@/types";
 
-// ── Status config ─────────────────────────────────────────────────────────────
 const STATUS_STYLE: Record<string, string> = {
   Ongoing: "bg-red-50 text-red-500 border border-red-200",
-  New:     "bg-red-50 text-red-500 border border-red-200",
+  New:      "bg-red-50 text-red-500 border border-red-200",
   Active:  "bg-gray-100 text-gray-600 border border-gray-200",
   Closed:  "bg-emerald-light text-emerald-mid border border-emerald-200",
   Resolved:"bg-emerald-light text-emerald-mid border border-emerald-200",
@@ -24,7 +23,6 @@ const SEV_DOT: Record<string, string> = {
   Low:      "bg-green-500",
 };
 
-// ── Filters ───────────────────────────────────────────────────────────────────
 const CATEGORIES = [
   "All", "Sexual Assault", "Harassment",
   "Domestic Violence", "Child Abuse", "Unknown",
@@ -54,15 +52,14 @@ export default function IncidentsPage() {
   const [category, setCategory] = useState("All");
   const [status,   setStatus]   = useState("All");
 
-  // Force the final 'incidents' variable to be an array of Incidents
   const { data, isLoading } = useIncidents();
-  const incidents = (data ?? []) as Incident[];
   
+  // 🚀 CRITICAL FIX: Direct array structural evaluation wrapper prevents crashes
+  const incidents = (Array.isArray(data) ? data : []) as Incident[];
   const acknowledge = useAcknowledgeIncident();
 
-  // ── Client-side filter ───────────────────────────────────────────────────────
-  // Typed 'inc' as 'Incident' to fix the implicit 'any' compile error
   const filtered = incidents.filter((inc) => {
+    if (!inc) return false;
     const catMatch = category === "All" || inc.incident_type === category;
     const statusMap: Record<string, string[]> = {
       New:      ["Ongoing"],
@@ -97,13 +94,11 @@ export default function IncidentsPage() {
         subtitle="Manage all reported incidents"
       />
 
-      {/* ── Filters ── */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
         <div className="flex items-center gap-1.5 text-[13px] text-gray-400 mr-1">
           <Filter size={13} /> Filters:
         </div>
 
-        {/* Category dropdown */}
         <div className="relative">
           <select
             value={category}
@@ -116,7 +111,6 @@ export default function IncidentsPage() {
           </select>
         </div>
 
-        {/* Status dropdown */}
         <div className="relative">
           <select
             value={status}
@@ -139,9 +133,7 @@ export default function IncidentsPage() {
         </div>
       </div>
 
-      {/* ── Table ── */}
       <div className="bg-white rounded-[14px] border border-gray-100 shadow-card overflow-hidden">
-        {/* Head */}
         <div className="grid grid-cols-[100px_1fr_120px_110px_160px_180px] px-6 py-3.5 bg-surface-secondary border-b border-gray-100">
           {["ID", "CATEGORY", "AREA", "TIME", "STATUS", "ACTION"].map((h) => (
             <span key={h} className="text-[11.5px] font-semibold text-gray-400 uppercase tracking-wide">
@@ -150,7 +142,6 @@ export default function IncidentsPage() {
           ))}
         </div>
 
-        {/* Rows */}
         {isLoading ? (
           <div className="p-6 space-y-5">
             {[1,2,3,4,5].map((i) => (
@@ -178,12 +169,10 @@ export default function IncidentsPage() {
                 "hover:bg-surface-secondary"
               )}
             >
-              {/* ID */}
               <span className="text-[13px] font-mono text-gray-500">
                 #{String(1000 + idx + 1).padStart(4, "0")}
               </span>
 
-              {/* Category */}
               <div className="flex items-center gap-2">
                 <span className={cn(
                   "w-2 h-2 rounded-full flex-shrink-0",
@@ -194,20 +183,21 @@ export default function IncidentsPage() {
                 </span>
               </div>
 
-              {/* Area */}
               <span className="text-[13.5px] text-gray-500">
                 {inc.location}
               </span>
 
-              {/* Time */}
+              {/* 🔧 FIXED: Consistent 12-Hour conversion rendering layout */}
               <span className="text-[13px] text-gray-500 font-mono">
-                {inc.incident_time?.slice(0, 5)}
+                {inc.incident_time ? (
+                  new Date(`1970-01-01T${inc.incident_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                ) : (
+                  new Date(inc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                )}
               </span>
 
-              {/* Status */}
               <StatusPill status={inc.follow_up_status} />
 
-              {/* Action */}
               <div className="flex items-center gap-2"
                 onClick={(e) => e.stopPropagation()}>
                 {!inc.is_acknowledged ? (
