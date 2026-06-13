@@ -13,7 +13,7 @@ import {
   useFieldStaffDashboard,
 } from "@/hooks";
 import { CardSkeleton, PageHeader, EmptyState } from "@/components/ui";
-import { LiveFeed, AlertsPanel, TopAreas } from "@/features/incidents/LiveFeed";
+import { LiveFeed } from "@/features/incidents/LiveFeed";
 import { cn } from "@/utils";
 import type { Incident } from "@/types";
 
@@ -67,6 +67,10 @@ function CoordinatorDashboardView() {
     ? `Welcome back, ${user.first_name}`
     : "Welcome back";
 
+  // Calculate maximum count to properly scale the Tailwind CSS progress bars dynamically
+  const topAreasList = data?.top_reported_areas ?? [];
+  const maxCount = topAreasList.length > 0 ? Math.max(...topAreasList.map((item: any) => item.count)) : 1;
+
   return (
     <div>
       <PageHeader
@@ -78,7 +82,7 @@ function CoordinatorDashboardView() {
         }
       />
 
-      {/* Stat cards - 🌟 FIXED: Dropped stray '=' and optimized with xl:grid-cols-4 layout logic */}
+      {/* Stat cards - Layout Logic */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)
@@ -142,8 +146,8 @@ function CoordinatorDashboardView() {
       </div>
 
       {/* Two column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-        {/* Live feed */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        {/* Left Column: Live feed */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[15px] font-semibold flex items-center gap-2">
@@ -172,55 +176,102 @@ function CoordinatorDashboardView() {
           )}
         </div>
 
-        {/* Right column */}
-        <div className="space-y-4">
-          {/* By city */}
+        {/* Right Column: Active Alerts Feed & Top Reported Areas Widgets */}
+        <div className="space-y-6">
+          
+          {/* 🌟 WIDGET 1: ACTIVE ALERTS PANELS */}
           <div className="sp-card p-5">
-            <h2 className="text-[15px] font-semibold mb-4">By City</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-[15px] font-semibold">Active Alerts</h2>
+              <button className="text-[12px] text-emerald-mid font-medium hover:underline">View all</button>
+            </div>
+
             {isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex justify-between">
-                    <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
-                    <div className="h-3 w-8  bg-gray-100 rounded animate-pulse" />
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="h-16 w-full bg-gray-50 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : !data?.active_alerts?.length ? (
+              <p className="text-[12px] text-gray-400 text-center py-4">All operations parameters are clear.</p>
+            ) : (
+              <div className="space-y-3.5">
+                {data.active_alerts.map((alert: any) => (
+                  <div key={alert.id} className="flex gap-3 p-3.5 rounded-xl border border-gray-50 bg-white shadow-2xs">
+                    <div className={cn(
+                      "w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-sm",
+                      alert.type === 'danger' ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-500'
+                    )}>
+                      {alert.type === 'danger' ? '🚨' : '⚠️'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-baseline">
+                        <h4 className={cn(
+                          "text-[13px] font-bold truncate",
+                          alert.type === 'danger' ? 'text-red-600' : 'text-orange-600'
+                        )}>
+                          {alert.title}
+                        </h4>
+                        <span className="text-[10px] text-gray-400 font-medium ml-2 whitespace-nowrap">{alert.timeAgo}</span>
+                      </div>
+                      <p className="text-[12px] text-gray-600 font-medium line-clamp-2 mt-0.5 leading-snug">{alert.description}</p>
+                      <span className="text-[10px] text-gray-400 font-medium mt-1 block">{alert.location}</span>
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <TopAreas areas={
-                (data?.by_city ?? []).map((c) => ({
-                  name:       c.location,
-                  count:      c.count,
-                  percentage: Math.round(
-                    (c.count / Math.max(...(data?.by_city ?? []).map((x) => x.count), 1)) * 100
-                  ),
-                }))
-              } />
             )}
           </div>
 
-          {/* Organisation info */}
-          {data && (
-            <div className="sp-card p-5">
-              <h2 className="text-[15px] font-semibold mb-3">Organisation</h2>
-              <div className="space-y-2.5">
-                <div>
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-0.5">Name</p>
-                  <p className="text-[13.5px] font-medium text-gray-800">{data.organisation}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-0.5">State</p>
-                  <p className="text-[13.5px] font-medium text-gray-800">{data.state}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-0.5">Your Role</p>
-                  <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-emerald-light text-emerald-sp">
-                    {data.role}
-                  </span>
-                </div>
+          {/* 🌟 WIDGET 2: TOP REPORTED AREAS (LGA/TOWN SUMMARY) */}
+          <div className="sp-card p-5">
+            <h2 className="text-[15px] font-semibold mb-4">Top Reported Areas</h2>
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="h-3 w-1/3 bg-gray-100 rounded animate-pulse" />
+                    <div className="h-2 w-full bg-gray-100 rounded animate-pulse" />
+                  </div>
+                ))}
               </div>
-            </div>
-          )}
+            ) : !topAreasList.length ? (
+              <p className="text-[12px] text-gray-400 text-center py-4">No regional coordinates logged.</p>
+            ) : (
+              <div className="space-y-4">
+                {topAreasList.map((item: any) => {
+                  // Determine customized color tokens matching visual design ranks
+                  const barColor = item.rank === 1 ? 'bg-red-500' : item.rank === 2 ? 'bg-orange-500' : 'bg-emerald-800';
+                  const badgeStyle = item.rank === 1 ? 'bg-red-50 text-red-700' : item.rank === 2 ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-800';
+
+                  return (
+                    <div key={item.rank} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[13px]">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0", badgeStyle)}>
+                            {item.rank}
+                          </span>
+                          <span className="font-bold text-gray-800 truncate">{item.name}</span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-gray-400 flex-shrink-0 ml-2">
+                          {item.count} reports
+                        </span>
+                      </div>
+                      
+                      {/* Graphical Progress Bar element layout */}
+                      <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          className={cn("h-full rounded-full transition-all duration-500", barColor)}
+                          style={{ width: `${(item.count / maxCount) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
     </div>
