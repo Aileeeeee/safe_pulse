@@ -13,6 +13,7 @@ export const INCIDENT_ENDPOINTS = {
   DASHBOARD:             "/api/incidents/dashboard/",
   FIELD_DASHBOARD:       "/api/incidents/field-dashboard/",
   COORDINATOR_DASHBOARD: "/api/incidents/coordinator-dashboard/",
+  ACTIVITY_LOG:          "/api/incidents/activity-log/",
 } as const;
 
 export const AUTH_ENDPOINTS = {
