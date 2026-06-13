@@ -84,7 +84,16 @@ export function useIncidents(filters?: IncidentFilters) {
     queryKey: [...QUERY_KEYS.INCIDENTS, filters],
     queryFn: async () => {
       const data = await incidentService.list(filters);
-      return data;
+      
+      // 🚀 FIXED: Automatically unwraps standard list streams OR DRF pagination wrappers
+      if (Array.isArray(data)) {
+        return data;
+      }
+      if (data && typeof data === "object" && "results" in data && Array.isArray(data.results)) {
+        return data.results;
+      }
+      
+      return []; // Defensive fallback if endpoint returns a status message object
     },
     staleTime: 10_000,
     refetchInterval: 20_000,
