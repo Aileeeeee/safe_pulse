@@ -89,14 +89,10 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
   const trustedContacts = incident.trusted_contacts ?? [];
   const isUnregistered = !incident.registered_user || !incident.device_hash || incident.device_hash.toUpperCase().includes("UNREGIST");
 
-  const contactsConfirmed = incident.timeline?.some(
-    (t: any) => t.title === "Trusted contact attempted"
-  );
-
   return (
     <div className="p-6 max-w-[1600px] mx-auto">
-      {/* ─── Critical Banner Section (Fixed Syntax Boundaries) ─── */}
-      {Boolean(isPulse && !incident.is_acknowledged && role === "COORDINATOR") && (
+      {/* Critical Banner */}
+      {isPulse && !incident.is_acknowledged && role === "COORDINATOR" && (
         <div className="flex items-center gap-3 bg-red-600 text-white px-5 py-3.5 rounded-xl mb-5 animate-pulse">
           <div className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
           <div className="flex-1">
@@ -104,7 +100,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
           </div>
           <button 
             onClick={() => acknowledge.mutate({ id: incident.id })} 
-            className="bg-white text-red-600 text-xs font-bold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="bg-white text-red-600 text-xs font-bold px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Acknowledge
           </button>
@@ -230,7 +226,6 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Location Map</h3>
             
-            {/* 🚨 FIXED: Inline validation types match requirement criteria strictly */}
             {incident && incident.latitude !== null && incident.longitude !== null ? (
               <IncidentMap 
                 latitude={incident.latitude} 
@@ -251,3 +246,36 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
             <div className="flex items-center gap-2 mb-4">
               <History size={16} className="text-gray-400" />
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Device History</h3>
+            </div>
+
+            {isLoadingHistory ? (
+              <Skeleton className="h-16 w-full rounded-xl" />
+            ) : historyData?.incidents && historyData.incidents.length > 0 ? (
+              <div className="space-y-3">
+                <div className="bg-gray-50 p-3 rounded-lg flex justify-between text-xs">
+                  <span className="text-gray-500">Total Incidents from Device:</span>
+                  <span className="font-bold text-gray-900">{historyData.total_reports}</span>
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+                  {historyData.incidents.map((hist: any) => (
+                    <div key={hist.id} className="p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors text-xs flex justify-between items-center">
+                      <div>
+                        <p className="font-bold text-gray-800">{hist.incident_type}</p>
+                        <p className="text-gray-400 text-[10px]">{new Date(hist.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <span className="text-gray-500 font-medium">#{hist.id}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 text-gray-400 text-xs p-4 rounded-xl text-center border border-dashed">
+                No past submission vectors detected for this profile.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
