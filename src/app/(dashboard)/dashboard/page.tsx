@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -10,13 +11,11 @@ import { useAuthStore } from "@/store/auth.store";
 import {
   useCoordinatorDashboard,
   useFieldStaffDashboard,
-  useAcknowledgeIncident,
 } from "@/hooks";
 import { CardSkeleton, PageHeader, EmptyState } from "@/components/ui";
 import { LiveFeed, AlertsPanel, TopAreas } from "@/features/incidents/LiveFeed";
 import { cn } from "@/utils";
 import type { Incident } from "@/types";
-import { toast } from "sonner";
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
@@ -41,11 +40,11 @@ export default function DashboardPage() {
 
   // 3. Route strictly based on true database string matches
   if (user.role === "FIELD_STAFF") {
-    return <FieldStaffDashboard />;
+    return <FieldStaffDashboardView />;
   }
 
   if (user.role === "COORDINATOR" || user.role === "ADMIN") {
-    return <CoordinatorDashboard />;
+    return <CoordinatorDashboardView />;
   }
 
   // Fallback for unauthorized/malformed profiles
@@ -60,8 +59,8 @@ export default function DashboardPage() {
   );
 }
 
-// ── Coordinator / Admin Dashboard ─────────────────────────────────────────────
-function CoordinatorDashboard() {
+// ── Coordinator / Admin Dashboard View ─────────────────────────────────────────────
+function CoordinatorDashboardView() {
   const { data, isLoading } = useCoordinatorDashboard();
   const user    = useAuthStore((s) => s.user);
   const greeting = user?.first_name
@@ -79,10 +78,10 @@ function CoordinatorDashboard() {
         }
       />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
-        ={isLoading ? (
-          [1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)
+      {/* Stat cards - 🌟 FIXED: Dropped stray '=' and optimized with xl:grid-cols-4 layout logic */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)
         ) : (
           <>
             <div className="sp-card p-5">
@@ -158,7 +157,7 @@ function CoordinatorDashboard() {
           </div>
           {isLoading ? (
             <div className="space-y-3">
-              {[1,2,3].map((i) => <CardSkeleton key={i} />)}
+              {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
             </div>
           ) : data?.incidents?.length === 0 ? (
             <EmptyState
@@ -180,7 +179,7 @@ function CoordinatorDashboard() {
             <h2 className="text-[15px] font-semibold mb-4">By City</h2>
             {isLoading ? (
               <div className="space-y-2">
-                {[1,2,3].map((i) => (
+                {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="flex justify-between">
                     <div className="h-3 w-20 bg-gray-100 rounded animate-pulse" />
                     <div className="h-3 w-8  bg-gray-100 rounded animate-pulse" />
@@ -228,8 +227,8 @@ function CoordinatorDashboard() {
   );
 }
 
-// ── Field Staff Dashboard ─────────────────────────────────────────────────────
-function FieldStaffDashboard() {
+// ── Field Staff Dashboard View ─────────────────────────────────────────────────────
+function FieldStaffDashboardView() {
   const { data, isLoading } = useFieldStaffDashboard();
   const user    = useAuthStore((s) => s.user);
   const router  = useRouter();
@@ -247,9 +246,9 @@ function FieldStaffDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 mb-6">
         {isLoading ? (
-          [1,2,3,4].map((i) => <CardSkeleton key={i} />)
+          Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)
         ) : (
           <>
             <div className="sp-card p-5">
@@ -301,7 +300,7 @@ function FieldStaffDashboard() {
 
       {isLoading ? (
         <div className="space-y-3">
-          {[1,2,3].map((i) => <CardSkeleton key={i} />)}
+          {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
         </div>
       ) : !data?.incidents?.length ? (
         <EmptyState
