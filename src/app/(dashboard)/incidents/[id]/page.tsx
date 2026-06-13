@@ -8,7 +8,6 @@ import {
   CheckCircle, AlertTriangle, UserPlus,
   Phone, Users, XCircle, HelpCircle, History
 } from "lucide-react";
-import { toast } from "sonner";
 import {
   useIncident, useAcknowledgeIncident,
   useAssignIncident, useConfirmContacts,
@@ -81,7 +80,6 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
 
   // Extract variables safely mapped to your Django view attributes
   const sev = SEV[incident.severity_level] ?? SEV.High;
-  const hasGPS = !!(incident.latitude && incident.longitude);
   const isPulse = incident.reporting_channel === "Mobile App" && incident.severity_level === "Critical";
   const isAssigned = !!incident.assignment;
   const assignedToMe = incident.assignment?.assigned_to?.id === user?.id;
@@ -228,10 +226,20 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Location Map</h3>
-            {hasGPS ? (
-              <IncidentMap latitude={incident.latitude} longitude={incident.longitude} location={incident.location} severity={incident.severity_level} height={260} />
+            
+            {/* 🚨 FIXED: Inline validation types match requirement criteria strictly */}
+            {incident && incident.latitude !== null && incident.longitude !== null ? (
+              <IncidentMap 
+                latitude={incident.latitude} 
+                longitude={incident.longitude} 
+                location={incident.location} 
+                severity={incident.severity_level} 
+                height={260} 
+              />
             ) : (
-              <div className="h-[260px] bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-xs">No active GPS stream</div>
+              <div className="h-[260px] bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-xs">
+                No active GPS stream
+              </div>
             )}
           </div>
 
@@ -240,36 +248,3 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
             <div className="flex items-center gap-2 mb-4">
               <History size={16} className="text-gray-400" />
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Device History</h3>
-            </div>
-
-            {isLoadingHistory ? (
-              <Skeleton className="h-16 w-full rounded-xl" />
-            ) : historyData?.incidents && historyData.incidents.length > 0 ? (
-              <div className="space-y-3">
-                <div className="bg-gray-50 p-3 rounded-lg flex justify-between text-xs">
-                  <span className="text-gray-500">Total Incidents from Device:</span>
-                  <span className="font-bold text-gray-900">{historyData.total_reports}</span>
-                </div>
-                <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
-                  {historyData.incidents.map((hist: any) => (
-                    <div key={hist.id} className="p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors text-xs flex justify-between items-center">
-                      <div>
-                        <p className="font-bold text-gray-800">{hist.incident_type}</p>
-                        <p className="text-gray-400 text-[10px]">{new Date(hist.created_at).toLocaleDateString()}</p>
-                      </div>
-                      <span className="text-gray-500 font-medium">#{hist.id}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="bg-gray-50 text-gray-400 text-xs p-4 rounded-xl text-center border border-dashed">
-                No past submission vectors detected for this profile.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
