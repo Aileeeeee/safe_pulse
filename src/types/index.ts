@@ -123,7 +123,7 @@ export interface Incident {
   timeline:                  TimelineEvent[];
   trusted_contacts:          TrustedContact[];
   
-  // 🚨 FIXED: Links Django profile serialization directly into your frontend model
+  // Links Django profile serialization directly into your frontend model
   registered_user:           RegisteredUser | null;
 }
 
@@ -140,22 +140,25 @@ export interface CoordinatorDashboard {
   new_reports:              number;
   new_reports_delta:        number;
   critical_ongoing:         number;
-  pending_acknowledgement: number;
+  pending_acknowledgement:  number;
   by_city:                  CityCount[];
   incidents:                Incident[];
 
-  top_reported_areas: Array<{
+  // 🌟 FIXED: Clean, bracketed type layouts ensuring proper compilation safety closures
+  top_reported_areas: {
     rank: number;
     name: string;
     count: number;
-  }>;
-  active_alerts: Array<{
+  }[];
+  
+  active_alerts: {
     id: string;
     title: string;
     description: string;
     location: string;
     timeAgo: string;
     type: 'danger' | 'warning';
+  }[];
 }
 
 export interface FieldStaffDashboard {
@@ -203,7 +206,7 @@ export interface ActiveAlert {
 }
 
 export interface TopArea {
-  name:       string;
-  percentage: number;
-  count:      number;
+  name:        string;
+  percentage:  number;
+  count:       number;
 }
