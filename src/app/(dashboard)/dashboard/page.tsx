@@ -223,7 +223,7 @@ function CoordinatorDashboardView() {
             )}
           </div>
 
-          {/* 🌟 WIDGET 2: TOP REPORTED AREAS (LGA/TOWN SUMMARY) */}
+          {/* 🌟 WIDGET 2: TOP REPORTED AREAS (GLOBAL ADMIN COMPATIBLE) */}
           <div className="sp-card p-5">
             <h2 className="text-[15px] font-semibold mb-4">Top Reported Areas</h2>
             {isLoading ? (
@@ -240,18 +240,25 @@ function CoordinatorDashboardView() {
             ) : (
               <div className="space-y-4">
                 {topAreasList.map((item: any) => {
-                  // Determine customized color tokens matching visual design ranks
                   const barColor = item.rank === 1 ? 'bg-red-500' : item.rank === 2 ? 'bg-orange-500' : 'bg-emerald-800';
                   const badgeStyle = item.rank === 1 ? 'bg-red-50 text-red-700' : item.rank === 2 ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-800';
 
                   return (
                     <div key={item.rank} className="space-y-1.5">
                       <div className="flex items-center justify-between text-[13px]">
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                           <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0", badgeStyle)}>
                             {item.rank}
                           </span>
-                          <span className="font-bold text-gray-800 truncate">{item.name}</span>
+                          {/* 🌟 CHANGED: Appends the parent state to provide structural context to ADMIN users */}
+                          <span className="font-bold text-gray-800 truncate">
+                            {item.name} 
+                            {item.state && (
+                              <span className="text-[11px] text-gray-400 font-normal ml-1">
+                                ({item.state})
+                              </span>
+                            )}
+                          </span>
                         </div>
                         <span className="text-[11px] font-semibold text-gray-400 flex-shrink-0 ml-2">
                           {item.count} reports
