@@ -143,6 +143,19 @@ export interface CoordinatorDashboard {
   pending_acknowledgement: number;
   by_city:                  CityCount[];
   incidents:                Incident[];
+
+  top_reported_areas: Array<{
+    rank: number;
+    name: string;
+    count: number;
+  }>;
+  active_alerts: Array<{
+    id: string;
+    title: string;
+    description: string;
+    location: string;
+    timeAgo: string;
+    type: 'danger' | 'warning';
 }
 
 export interface FieldStaffDashboard {
