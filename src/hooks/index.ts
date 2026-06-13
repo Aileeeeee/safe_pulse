@@ -85,15 +85,17 @@ export function useIncidents(filters?: IncidentFilters) {
     queryFn: async () => {
       const data = await incidentService.list(filters);
       
-      // 🚀 FIXED: Automatically unwraps standard list streams OR DRF pagination wrappers
       if (Array.isArray(data)) {
         return data;
       }
-      if (data && typeof data === "object" && "results" in data && Array.isArray(data.results)) {
-        return data.results;
+      
+      // FIXED: Cast to 'any' tells the TS type checker it's safe to inspect the property shape
+      const extendedData = data as any;
+      if (extendedData && typeof extendedData === "object" && "results" in extendedData && Array.isArray(extendedData.results)) {
+        return extendedData.results;
       }
       
-      return []; // Defensive fallback if endpoint returns a status message object
+      return [];
     },
     staleTime: 10_000,
     refetchInterval: 20_000,
