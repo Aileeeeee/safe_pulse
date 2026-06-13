@@ -148,6 +148,7 @@ export interface CoordinatorDashboard {
   top_reported_areas: {
     rank: number;
     name: string;
+    state: string;
     count: number;
   }[];
   
