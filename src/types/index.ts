@@ -71,6 +71,14 @@ export interface TrustedContact {
   notified_at: string;
 }
 
+export interface RegisteredUser {
+  id:              number;
+  phone_hash:      string;
+  registered_zone: string;
+  landmark:        string;
+  created_at:      string;
+}
+
 export interface IncidentAssignment {
   assigned_to: {
     id:       number;
@@ -84,37 +92,39 @@ export interface IncidentAssignment {
   notes:       string;
 }
 
-
 export interface Incident {
-  id:                       number;
-  incident_date:            string;
-  incident_time:            string;
-  reporting_channel:        string;
-  follow_up_status:         string;
-  is_anonymous:             boolean;
-  created_at:               string;
-  updated_at:               string;
-  location:                 string;
-  latitude:                 number | null;
-  longitude:                number | null;
-  location_accuracy:        number | null;
-  location_confidence:      string;
-  location_source:          string;
-  incident_type:            string;
-  severity_level:           IncidentSeverity;
-  victim_age:               number | null;
-  victim_gender:            string;
-  perpetrator_relationship: string;
-  support_provided:         string;
-  reporter_type:            string;
-  notes:                    string;
-  is_acknowledged:          boolean;
-  acknowledged_at:          string | null;
-  device_hash:              string;
-  last_verified_location:   string;
-  assignment?: IncidentAssignment;
-  timeline:                 TimelineEvent[];
-  trusted_contacts:         TrustedContact[];
+  id:                        number;
+  incident_date:             string;
+  incident_time:             string;
+  reporting_channel:         string;
+  follow_up_status:          string;
+  is_anonymous:              boolean;
+  created_at:                string;
+  updated_at:                string;
+  location:                  string;
+  latitude:                  number | null;
+  longitude:                 number | null;
+  location_accuracy:         number | null;
+  location_confidence:       string;
+  location_source:           string;
+  incident_type:             string;
+  severity_level:            IncidentSeverity;
+  victim_age:                number | null;
+  victim_gender:             string;
+  perpetrator_relationship:  string;
+  support_provided:          string;
+  reporter_type:             string;
+  notes:                     string;
+  is_acknowledged:           boolean;
+  acknowledged_at:           string | null;
+  device_hash:               string;
+  last_verified_location:    string;
+  assignment?:               IncidentAssignment;
+  timeline:                  TimelineEvent[];
+  trusted_contacts:          TrustedContact[];
+  
+  // 🚨 FIXED: Links Django profile serialization directly into your frontend model
+  registered_user:           RegisteredUser | null;
 }
 
 export interface CityCount {
@@ -123,16 +133,16 @@ export interface CityCount {
 }
 
 export interface CoordinatorDashboard {
-  state:                   string;
-  organisation:            string;
-  role:                    string;
-  total_incidents:         number;
-  new_reports:             number;
-  new_reports_delta:       number;
-  critical_ongoing:        number;
+  state:                    string;
+  organisation:             string;
+  role:                     string;
+  total_incidents:          number;
+  new_reports:              number;
+  new_reports_delta:        number;
+  critical_ongoing:         number;
   pending_acknowledgement: number;
-  by_city:                 CityCount[];
-  incidents:               Incident[];
+  by_city:                  CityCount[];
+  incidents:                Incident[];
 }
 
 export interface FieldStaffDashboard {
@@ -155,6 +165,8 @@ export interface IncidentFilters {
   page_size?:        number;
 }
 
+// ─── API & Core Operations ─────────────────────────────────────────────────────
+
 export interface ApiError {
   message:  string;
   code?:    string;
@@ -168,37 +180,17 @@ export interface PaginatedResponse<T> {
   results:  T[];
 }
 
-export interface ApiError {
-  message:  string;
-  code?:    string;
-  details?: Record<string, string[]>;
-}
-
-// ─── API ─────────────────────────────────────────────────────────────────────
-
-export interface ApiError {
-  message: string;
-  code?: string;
-  details?: Record<string, string[]>;
-}
-
-export interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
-}
 export interface ActiveAlert {
-  id: number | string;
-  type: "critical" | "warning" | "info";
-  title: string;
+  id:          number | string;
+  type:        "critical" | "warning" | "info";
+  title:       string;
   description: string;
-  area: string;
-  count: number;
+  area:        string;
+  count:       number;
 }
 
 export interface TopArea {
-  name: string;
+  name:       string;
   percentage: number;
-  count: number;
+  count:      number;
 }
