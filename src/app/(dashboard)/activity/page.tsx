@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 // Import your centralized configuration mappings
-import { API_BASE_URL, INCIDENT_ENDPOINTS, TOKEN_KEY } from "@/constants/api"; // Adjust your file import path
+import { API_BASE_URL, INCIDENT_ENDPOINTS, TOKEN_KEY } from "@/src/constants/api";
 
 interface ActivityLog {
   emoji: string;
