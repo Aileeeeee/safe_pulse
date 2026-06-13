@@ -100,7 +100,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
           </div>
           <button 
             onClick={() => acknowledge.mutate({ id: incident.id })} 
-            className="bg-white text-red-600 text-xs font-bold px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            className="bg-white text-red-600 text-xs font-bold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             Acknowledge
           </button>
@@ -139,7 +139,8 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
               <div>
                 <span className="text-xs text-gray-400 block">Time Reported</span>
                 <span className="text-sm font-semibold text-gray-800">
-                  {incident.incident_time || new Date(incident.created_at).toLocaleTimeString()}
+                  {/* 🔧 FIXED: Strict formatting structure to force 12-Hour layout stream */}
+                  {incident.incident_time || new Date(incident.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                 </span>
               </div>
               <div>
