@@ -42,15 +42,14 @@ export default function ReportsPage() {
   const [category, setCategory] = useState("All");
   const [status,   setStatus]   = useState("All");
 
-  // 1. Extract data and isLoading from the hook
   const { data, isLoading } = useIncidents();
   
-  // 2. Cast the final array so TypeScript knows exactly what it is
-  const incidents = (data ?? []) as Incident[];
+  // 🚀 CRITICAL FIX: Safe defensive guard check to confirm structural array data
+  const incidents = (Array.isArray(data) ? data : []) as Incident[];
   const acknowledge = useAcknowledgeIncident();
 
-  // Reports = same incidents, just called "reports" with R- prefix
   const filtered = incidents.filter((inc) => {
+    if (!inc) return false;
     const catMatch   = category === "All" || inc.incident_type === category;
     const statusMatch = status === "All" ||
       (status === "New" ? inc.follow_up_status === "Ongoing" :
@@ -140,9 +139,16 @@ export default function ReportsPage() {
                 <span className="text-[13.5px] font-medium text-gray-800">{inc.incident_type}</span>
               </div>
               <span className="text-[13.5px] text-gray-500">{inc.location}</span>
+              
+              {/* 🔧 FIXED: 12-Hour format stream logic wrapper */}
               <span className="text-[13px] text-gray-500 font-mono">
-                {new Date(inc.created_at).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}
+                {inc.incident_time ? (
+                  new Date(`1970-01-01T${inc.incident_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                ) : (
+                  new Date(inc.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                )}
               </span>
+
               <StatusPill status={inc.follow_up_status} />
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 {!inc.is_acknowledged ? (
