@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES  = ["/login", "/signup"];
+// Added your new views explicitly to the public whitelist
+const PUBLIC_ROUTES  = ["/login", "/signup", "/welcome", "/request-access"];
 const PRIVATE_PREFIX = ["/dashboard", "/incidents", "/alerts", "/analytics", "/team", "/activity", "/settings"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // Checking against your specific token storage tracking configuration key
   const token = request.cookies.get("sp_access")?.value;
 
-  // Redirect authenticated users away from auth pages
-  if (token && PUBLIC_ROUTES.some((r) => pathname.startsWith(r))) {
+  // Redirect authenticated active users directly to work dashboard context
+  if (token && PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"))) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Redirect unauthenticated users away from private pages
+  // Intercept unauthenticated entries onto restricted dashboard features
   if (!token && PRIVATE_PREFIX.some((p) => pathname.startsWith(p))) {
-    const loginUrl = new URL("/login", request.url);
+    const loginUrl = new URL("/welcome", request.url); // Send them to welcome onboarding path
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
