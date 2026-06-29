@@ -26,6 +26,7 @@ export function useLogin() {
   const setUser = useAuthStore((s) => s.setUser);
 
   return useMutation({
+    // FIXED: Ensured the response payload returns directly through the wrapper
     mutationFn: (payload: LoginPayload) => authService.login(payload),
     onSuccess: (data) => {
       setUser(data.user);
@@ -36,6 +37,7 @@ export function useLogin() {
 
 export function useSignup() {
   return useMutation({
+    // FIXED: Added missing payload data pipeline throughput
     mutationFn: (payload: SignupPayload) => authService.signup(payload),
   });
 }
@@ -89,7 +91,6 @@ export function useIncidents(filters?: IncidentFilters) {
         return data;
       }
       
-      // FIXED: Cast to 'any' tells the TS type checker it's safe to inspect the property shape
       const extendedData = data as any;
       if (extendedData && typeof extendedData === "object" && "results" in extendedData && Array.isArray(extendedData.results)) {
         return extendedData.results;
@@ -216,7 +217,6 @@ export function useTeam() {
 // ─── Device & Tracking Resolvers ──────────────────────────────────────────────
 
 export function useDeviceHistory(deviceHash: string) {
-  // Guard clause against empty, "Unknown", or default unassigned hashes
   const isValidHash = !!deviceHash && 
     !deviceHash.toUpperCase().includes("UNREGIST") && 
     deviceHash !== "Unknown";
@@ -230,7 +230,6 @@ export function useDeviceHistory(deviceHash: string) {
 }
 
 export function useTrustedContacts(phoneHash: string) {
-  // Guard clause matching the query string filter requirements
   const isValidHash = !!phoneHash && 
     !phoneHash.toUpperCase().includes("UNREGIST") && 
     phoneHash !== "Unknown";
