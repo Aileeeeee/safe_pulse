@@ -10,7 +10,7 @@ import { useLogin } from "@/hooks";
 import { cn } from "@/utils";
 
 const schema = z.object({
-  username: z.string().min(1, "Username is required"),
+  username: z.string().min(1, "Username or email is required"),
   password: z.string().min(1, "Password is required"),
 });
 type FormData = z.infer<typeof schema>;
@@ -57,16 +57,16 @@ export function LoginForm() {
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* Username */}
+        {/* Username or Email */}
         <div className="mb-3.5">
           <label className="block text-[12.5px] font-medium text-gray-800 mb-1.5">
-            Username
+            Username or Email Address
           </label>
           <input
             {...register("username")}
             type="text"
             autoComplete="username"
-            placeholder="Enter your username"
+            placeholder="Enter your username or email"
             className={cn(
               "w-full px-3.5 py-2.5 border-[1.5px] rounded-[9px] text-sm outline-none transition-all",
               "border-gray-200 focus:border-emerald-mid focus:ring-2 focus:ring-emerald-mid/10",
