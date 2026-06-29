@@ -12,27 +12,34 @@ export const authService = {
   /**
    * POST /api/auth/login/
    * Django LoginView expects: { username, password }
-   * Returns: { user, tokens }
+   * Returns: { user, access, refresh }
    */
   async login(payload: LoginPayload): Promise<AuthResponse> {
     const { data } = await api.post<AuthResponse>(
       AUTH_ENDPOINTS.LOGIN,
       payload
     );
-    saveTokens(data.tokens);
+    
+    // FIXED: Pass the root data object because 'access' and 'refresh' are root level keys
+    saveTokens(data); 
     return data;
   },
 
   /**
    * POST /api/auth/signup/
    * Django SignupView expects: { username, email, password, organisation_id, role }
-   * Returns: { user, tokens, message }
+   * Returns: { user, access, refresh, message }
    */
   async signup(payload: SignupPayload): Promise<AuthResponse> {
     const { data } = await api.post<AuthResponse>(
       AUTH_ENDPOINTS.SIGNUP,
       payload
     );
+    
+    // FIXED: Save tokens on successful registration so they are immediately authenticated
+    if (data.access) {
+      saveTokens(data);
+    }
     return data;
   },
 
