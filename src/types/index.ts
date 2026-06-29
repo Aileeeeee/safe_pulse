@@ -47,7 +47,8 @@ export interface SignupPayload {
 
 export interface AuthResponse {
   user:     User;
-  tokens:   AuthTokens;
+  access:   string;   // FIXED: Placed at the root to match flat Django response
+  refresh:  string;   // FIXED: Placed at the root to match flat Django response
   message?: string;
 }
 
@@ -144,7 +145,6 @@ export interface CoordinatorDashboard {
   by_city:                  CityCount[];
   incidents:                Incident[];
 
-  // 🌟 FIXED: Clean, bracketed type layouts ensuring proper compilation safety closures
   top_reported_areas: {
     rank: number;
     name: string;
